@@ -1,6 +1,11 @@
 .section .text, "ax"
 .global _interrupt_handler
 _interrupt_handler:
+    csrw    mscratch,ra
+    csrr    ra,mcause
+    addi    ra,ra,-11
+    beqz    ra,_system_call
+    csrr    ra,mscratch
     addi	sp,sp,-44
     sw	    gp,40(sp)
     sw	    ra,36(sp)
@@ -31,4 +36,15 @@ _interrupt_handler:
     lw	    a4,4(sp)
     lw	    a5,0(sp)
     addi    sp,sp,40
+    mret
+_system_call:
+    csrr    ra,mscratch
+    csrw    mepc,ra
+    csrw    mscratch,gp
+    .option push
+    .option norelax
+    la gp, __global_pointer$
+    .option pop
+    call    c_system_call
+    csrr    gp,mscratch
     mret
