@@ -37,6 +37,8 @@ __attribute__((always_inline)) inline void csr_disable_interrupts(void){
 #define MTIMECMP_LOW    (*((volatile uint32_t *)0x40000010))
 #define MTIMECMP_HIGH   (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER      (*((volatile uint32_t *)0x40000018))
+#define MODE_CONTROL_REG (*((volatile uint32_t *)0x500FF414))
+
 
 void init(void){
     uint8_t *Source = _erodata;
@@ -55,6 +57,7 @@ void init(void){
     csr_write_mie(0x888);       // Enable all interrupt soruces
     csr_enable_interrupts();    // Global interrupt enable
     // MIER = 0x000000f1;
+    MODE_CONTROL_REG = 0x00000001;
     MTIMECMP_LOW = 1;
     MTIMECMP_HIGH = 0;
 }
