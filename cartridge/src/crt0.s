@@ -16,7 +16,7 @@ _start:
     
 
 .section .text, "ax"
-.global getTicks, getStatus, setGraphicsMode, setTextMode 
+.global getTicks, getStatus, setGraphicsMode
 getTicks:
     li a5, 0
     ecall
@@ -25,8 +25,5 @@ getStatus:
     ecall
 setGraphicsMode:
     li a5, 2
-    ecall
-setTextMode:
-    li a5, 3
     ecall
 .end

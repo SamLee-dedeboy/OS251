@@ -12,11 +12,9 @@ int mode = 0; // 0 = text mode, 1 = graphics mode
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile char *SM_SPRITE_MEMORY_0 = (volatile uint8_t *)(0x500F4000);
 volatile uint32_t *SPRITE_PALETTE_0 = (volatile uint32_t *)(0x500FD000);
+volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
 
 int main() {
-    // TODO: respond to CMD interrupt to toggle text/graphics mode
-    setGraphicsMode();
-    mode = 1;
     // Palette
     volatile uint32_t *SPRITE_PALETTE_0 = (volatile uint32_t *)(0x500FD000);
     for(int i = 0; i < 256; i++) {
@@ -56,6 +54,13 @@ int main() {
     while (1) {
         global = getTicks();
         if(global != last_global){
+            if(((*INT_PENDING_REG) & 0x4) >> 2) {
+                // TODO: switch back to text mode
+                if(mode == 0) {
+                    setGraphicsMode();
+                    mode = 1;
+                }
+            }
             controller_status = getStatus();
             if(controller_status){
                 if(mode == 0) {
