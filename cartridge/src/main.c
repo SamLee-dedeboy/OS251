@@ -48,9 +48,11 @@ int main() {
     VIDEO_MEMORY[11] = '!';
     VIDEO_MEMORY[12] = 'X';
     while (1) {
-        continue;
         global = getTicks();
         if(global != last_global){
+        // ctr_bits = 000 1111 1111 000010000 0000010000 00
+               //dx = 000 0000 0000 000000000 0000000001 00
+            (*((volatile uint32_t *)0x500FF214 + 0)) += 0x00000008; 
             controller_status = getStatus();
             if(controller_status){
                 VIDEO_MEMORY[x_pos] = ' ';
