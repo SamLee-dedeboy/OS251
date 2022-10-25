@@ -5,12 +5,18 @@ volatile uint32_t controller_status = 0;
 
 uint32_t getTicks(void);
 uint32_t getStatus(void);
+uint32_t setGraphicsMode(void);
+uint32_t setTextMode(void);
+int mode = 0; // 0 = text mode, 1 = graphics mode
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile char *SM_SPRITE_MEMORY_0 = (volatile uint8_t *)(0x500F4000);
 volatile uint32_t *SPRITE_PALETTE_0 = (volatile uint32_t *)(0x500FD000);
 
 int main() {
+    // TODO: respond to CMD interrupt to toggle text/graphics mode
+    setGraphicsMode();
+    mode = 1;
     // Palette
     volatile uint32_t *SPRITE_PALETTE_0 = (volatile uint32_t *)(0x500FD000);
     for(int i = 0; i < 256; i++) {
@@ -50,33 +56,37 @@ int main() {
     while (1) {
         global = getTicks();
         if(global != last_global){
-        // ctr_bits = 000 1111 1111 000010000 0000010000 00
-               //dx = 000 0000 0000 000000000 0000000001 00
-            (*((volatile uint32_t *)0x500FF214 + 0)) += 0x00000008; 
             controller_status = getStatus();
             if(controller_status){
-                VIDEO_MEMORY[x_pos] = ' ';
-                if(controller_status & 0x1){
-                    if(x_pos & 0x3F){
-                        x_pos--;
+                if(mode == 0) {
+                    VIDEO_MEMORY[x_pos] = ' ';
+                    if(controller_status & 0x1){
+                        if(x_pos & 0x3F){
+                            x_pos--;
+                        }
                     }
-                }
-                if(controller_status & 0x2){
-                    if(x_pos >= 0x40){
-                        x_pos -= 0x40;
+                    if(controller_status & 0x2){
+                        if(x_pos >= 0x40){
+                            x_pos -= 0x40;
+                        }
                     }
-                }
-                if(controller_status & 0x4){
-                    if(x_pos < 0x8C0){
-                        x_pos += 0x40;
+                    if(controller_status & 0x4){
+                        if(x_pos < 0x8C0){
+                            x_pos += 0x40;
+                        }
                     }
-                }
-                if(controller_status & 0x8){
-                    if((x_pos & 0x3F) != 0x3F){
-                        x_pos++;
+                    if(controller_status & 0x8){
+                        if((x_pos & 0x3F) != 0x3F){
+                            x_pos++;
+                        }
                     }
+                    VIDEO_MEMORY[x_pos] = 'X';
+                } else if(mode == 1) {
+                    // TODO: add response to controller status & bound checks
+                    // ctr_bits = 000 1111 1111 000010000 0000010000 00
+                           //dx = 000 0000 0000 000000000 0000000001 00
+                    (*((volatile uint32_t *)0x500FF214 + 0)) += 0x00000008; 
                 }
-                VIDEO_MEMORY[x_pos] = 'X';
             }
             last_global = global;
         }
