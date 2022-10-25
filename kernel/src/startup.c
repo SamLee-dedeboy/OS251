@@ -31,7 +31,6 @@ __attribute__((always_inline)) inline void csr_disable_interrupts(void){
     asm volatile ("csrci mstatus, 0x8");
 }
 
-// #define MIER       (*((volatile uint32_t *)0x40000000))
 #define MTIME_LOW       (*((volatile uint32_t *)0x40000008))
 #define MTIME_HIGH      (*((volatile uint32_t *)0x4000000C))
 #define MTIMECMP_LOW    (*((volatile uint32_t *)0x40000010))
@@ -56,7 +55,6 @@ void init(void){
 
     csr_write_mie(0x888);       // Enable all interrupt soruces
     csr_enable_interrupts();    // Global interrupt enable
-    // MIER = 0x000000f1;
     MODE_CONTROL_REG = 0x00000001;
     MTIMECMP_LOW = 1;
     MTIMECMP_HIGH = 0;
@@ -80,6 +78,10 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     }
     else if(call == 1){
         return CONTROLLER;
+    } else if(call == 2) {
+        MODE_CONTROL_REG = 0x00000001;
+    } else if(call == 3) {
+        MODE_CONTROL_REG = 0x00000000;
     }
     return -1;
 }
