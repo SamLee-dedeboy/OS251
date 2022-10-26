@@ -5,14 +5,15 @@ volatile uint32_t controller_status = 0;
 
 uint32_t getTicks(void);
 uint32_t getStatus(void);
-uint32_t setGraphicsMode(void);
-uint32_t setTextMode(void);
+uint32_t getMode(void);
 int mode = 0; // 0 = text mode, 1 = graphics mode
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile char *SM_SPRITE_MEMORY_0 = (volatile uint8_t *)(0x500F4000);
 volatile uint32_t *SPRITE_PALETTE_0 = (volatile uint32_t *)(0x500FD000);
+volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
+#define MODE_CONTROL_REG (*((volatile uint32_t *)0x500FF414))
 
 int main() {
     // Palette
@@ -51,16 +52,18 @@ int main() {
     VIDEO_MEMORY[10] = 'd';
     VIDEO_MEMORY[11] = '!';
     VIDEO_MEMORY[12] = 'X';
+    (*INT_ENABLE_REG) = 0x7;
     while (1) {
         global = getTicks();
         if(global != last_global){
-            if(((*INT_PENDING_REG) & 0x4) >> 2) {
-                // TODO: switch back to text mode
-                if(mode == 0) {
-                    setGraphicsMode();
-                    mode = 1;
-                }
+            mode = getMode();
+            if(mode == 1) {
+                // TODO: add response to controller status & bound checks
+                // ctr_bits = 000 1111 1111 000010000 00 0001 0000 00
+                        //dx = 000 0000 0000 00000 0001 0000 0000 0000
+                (*((volatile uint32_t *)0x500FF214 + 0)) += 0x00001000; 
             }
+
             controller_status = getStatus();
             if(controller_status){
                 if(mode == 0) {
@@ -86,13 +89,7 @@ int main() {
                         }
                     }
                     VIDEO_MEMORY[x_pos] = 'X';
-                } else if(mode == 1) {
-                    // TODO: add response to controller status & bound checks
-                    // ctr_bits = 000 1111 1111 000010000 0000010000 00
-                           //dx = 000 0000 0000 000000000 0000000001 00
-                    (*((volatile uint32_t *)0x500FF214 + 0)) += 0x00000008; 
-                }
-            }
+                }             }
             last_global = global;
         }
     }

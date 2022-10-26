@@ -62,6 +62,7 @@ void init(void){
 extern volatile int global;
 extern volatile uint32_t controller_status;
 
+volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
 void c_interrupt_handler(uint32_t mcause){
     uint64_t NewCompare = (((uint64_t)MTIMECMP_HIGH)<<32) | MTIMECMP_LOW;
     NewCompare += 100;
@@ -69,6 +70,13 @@ void c_interrupt_handler(uint32_t mcause){
     MTIMECMP_LOW = NewCompare;
     global++;
     controller_status = CONTROLLER;
+    if((((*INT_PENDING_REG) & 0x4) >> 2)) {
+        if(MODE_CONTROL_REG == 0x1)
+            MODE_CONTROL_REG = 0x00000000;
+        else if(MODE_CONTROL_REG == 0x0)
+            MODE_CONTROL_REG = 0x00000001;
+    }
+    (*INT_PENDING_REG) |= ~(1U << 2);
 }
 
 uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t call){
@@ -79,13 +87,8 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
         return CONTROLLER;
     }
      else if(call == 2) {
-        MODE_CONTROL_REG = 0x00000001;
-        return 1;
-     }
-    // } else if(call == 3) {
-    //     MODE_CONTROL_REG = 0x00000000;
-    //     return 1;
-    // }
+        return MODE_CONTROL_REG;
+    }
     return -1;
 }
 
