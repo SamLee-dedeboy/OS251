@@ -36,6 +36,7 @@ __attribute__((always_inline)) inline void csr_disable_interrupts(void){
 #define MTIMECMP_LOW    (*((volatile uint32_t *)0x40000010))
 #define MTIMECMP_HIGH   (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER      (*((volatile uint32_t *)0x40000018))
+#define MODE_CONTROL_REG (*((volatile uint32_t *)0x500FF414))
 
 void init(void){
     uint8_t *Source = _erodata;
@@ -59,6 +60,9 @@ void init(void){
 
 extern volatile int global;
 extern volatile uint32_t controller_status;
+volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
+int color = 1;
+int color_counter = 0;
 
 void c_interrupt_handler(uint32_t mcause){
     uint64_t NewCompare = (((uint64_t)MTIMECMP_HIGH)<<32) | MTIMECMP_LOW;
@@ -67,5 +71,45 @@ void c_interrupt_handler(uint32_t mcause){
     MTIMECMP_LOW = NewCompare;
     global++;
     controller_status = CONTROLLER;
+    if((((*INT_PENDING_REG) & 0x4) >> 2)) { // cmd interrupt: change mode.
+        if(MODE_CONTROL_REG == 0x1)
+            MODE_CONTROL_REG = 0x00000000;
+        else if(MODE_CONTROL_REG == 0x0)
+            MODE_CONTROL_REG = 0x00000001;
+    }
+    if((((*INT_PENDING_REG) & 0x2) >> 1)) { // video interrupt: change color.
+        if (color_counter > 1000000) color_counter = 0;
+        else color_counter += 1;
+        if (color_counter%100==0){
+            if (color==1){
+                color = 2;
+            }
+            else if (color==2){
+                color = 1;
+            }
+        }
+        
+        // if(MODE_CONTROL_REG == 0x1)
+        //     MODE_CONTROL_REG = 0x00000000;
+        // else if(MODE_CONTROL_REG == 0x0)
+        //     MODE_CONTROL_REG = 0x00000001;
+    }
+    (*INT_PENDING_REG) |= ~(1U << 2);
+}
+
+uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t call){
+    if(call == 0){
+        return global;
+    }
+    else if(call == 1){
+        return CONTROLLER;
+    }
+    else if(call == 2) {
+        return MODE_CONTROL_REG;
+    }
+    else if(call == 3) {
+        return color;
+    }
+    return -1;
 }
 

@@ -13,4 +13,20 @@ _start:
     nop
     jal zero, main
     .cfi_endproc
-    .end
+    
+
+.section .text, "ax"
+.global getTicks, getStatus, getMode, getColor
+getTicks:
+    li a5, 0
+    ecall
+getStatus:
+    li a5, 1
+    ecall
+getMode:
+    li a5, 2
+    ecall
+getColor:
+    li a5, 3
+    ecall
+.end
