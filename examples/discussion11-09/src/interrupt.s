@@ -80,4 +80,3 @@ SwitchContext:
     lw      a5,0(sp)
     addi	sp,sp,56
     ret
-
