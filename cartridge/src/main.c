@@ -8,11 +8,17 @@ volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 
+#define SYSTIMER 0x00000001
+#define CONTROLLER_STATUS 0x00000002
+#define MODE_STATUS 0x00000003
+#define SMALL_SPRITE_DROP 0x00000004
+
 uint32_t getTicks(void);
 uint32_t getStatus(void);
 uint32_t getMode(void);
 uint32_t initThread(void);
 uint32_t spritedown(void);
+uint32_t systemcall(uint32_t funName);
 
 TContext newThread;
 int mode = 0; // 0 = text mode, 1 = graphics mode
@@ -53,21 +59,23 @@ int main()
 
     while (1)
     {
-        global = getTicks();
+        global = systemcall(SYSTIMER);
+        // global = getTicks();
         if (global != last_global)
         {
-            mode = getMode();
+            mode = systemcall(MODE_STATUS);
+            // mode = getMode();
             if (mode == 1)
             {
                 // TODO: add response to controller status & bound checks
                 // ctr_bits = 000 1111 1111 000010000 00 0001 0000 00
                 // dx = 000 0000 0000 00000 0001 0000 0000 0000
-                spritedown();
+                systemcall(SMALL_SPRITE_DROP);
                 // continue;
                 // (*((volatile uint32_t *)0x500FF214 + 0)) += 0x00001000;
             }
 
-            controller_status = getStatus();
+            controller_status = systemcall(CONTROLLER_STATUS); // getStatus();
             if (controller_status)
             {
                 if (mode == 0)

@@ -16,7 +16,9 @@ _start:
     
 
 .section .text, "ax"
-.global getTicks, getStatus, getMode,initThread,spritedown
+.global systemcall, getTicks, getStatus, getMode,initThread,spritedown
+systemcall:
+    ecall
 getTicks:
     li a5, 0
     ecall

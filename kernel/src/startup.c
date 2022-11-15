@@ -47,6 +47,10 @@ __attribute__((always_inline)) inline void csr_disable_interrupts(void)
 #define MTIMECMP_HIGH (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 #define MODE_CONTROL_REG (*((volatile uint32_t *)0x500FF414))
+#define SYSTIMER 0x00000001
+#define CONTROLLER_STATUS 0x00000002
+#define MODE_STATUS 0x00000003
+#define SMALL_SPRITE_DROP 0x00000004
 
 volatile uint32_t *smallspritecontrol = (volatile uint32_t *)(0x500FF214);
 
@@ -119,19 +123,37 @@ TContext InitContext(uint32_t *stacktop, TEntry entry, void *param);
 
 uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t call)
 {
-    if (call == 0)
+    switch (a0)
     {
+    case SYSTIMER:
         return global;
-    }
-    else if (call == 1)
-    {
+        break;
+
+    case CONTROLLER_STATUS:
         return CONTROLLER;
-    }
-    else if (call == 2)
-    {
+        break;
+
+    case MODE_STATUS:
         return MODE_CONTROL_REG;
+        break;
+    case SMALL_SPRITE_DROP:
+        smallspritecontrol[0] += 0x00001000;
+        return 1;
     }
-    else if (call == 3)
+    // if (call == 0)
+    // {
+    //     return global;
+    // }
+    // else if (call == 1)
+    // {
+    //     return CONTROLLER;
+    // }
+    // else if (call == 2)
+    // {
+    //     return MODE_CONTROL_REG;
+    // }
+    // else
+    if (call == 3)
     {
         uint32_t ThreadStack[128];
         return InitContext(ThreadStack + 128, (void *)0, (void *)0);
