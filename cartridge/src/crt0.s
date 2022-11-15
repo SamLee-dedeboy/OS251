@@ -16,22 +16,10 @@ _start:
     
 
 .section .text, "ax"
-.global systemcall, getTicks, getStatus, getMode,initThread,spritedown
+.global systemcall, initThread
 systemcall:
-    ecall
-getTicks:
-    li a5, 0
-    ecall
-getStatus:
-    li a5, 1
-    ecall
-getMode:
-    li a5, 2
     ecall
 initThread:
     li a5,3
-    ecall
-spritedown:
-    li a5,4
     ecall
 .end

@@ -7,17 +7,13 @@ volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
-
+// define sys call func parameters
 #define SYSTIMER 0x00000001
 #define CONTROLLER_STATUS 0x00000002
 #define MODE_STATUS 0x00000003
 #define SMALL_SPRITE_DROP 0x00000004
 
-uint32_t getTicks(void);
-uint32_t getStatus(void);
-uint32_t getMode(void);
 uint32_t initThread(void);
-uint32_t spritedown(void);
 uint32_t systemcall(uint32_t funName);
 
 TContext newThread;
@@ -60,11 +56,9 @@ int main()
     while (1)
     {
         global = systemcall(SYSTIMER);
-        // global = getTicks();
         if (global != last_global)
         {
             mode = systemcall(MODE_STATUS);
-            // mode = getMode();
             if (mode == 1)
             {
                 // TODO: add response to controller status & bound checks
