@@ -1,21 +1,10 @@
 #include <stdint.h>
-
-typedef uint32_t *TContext;
-typedef void (*TEntry)(void *);
+#include "main.h"
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
-// define sys call func parameters
-#define SYSTIMER 0x00000001
-#define CONTROLLER_STATUS 0x00000002
-#define MODE_STATUS 0x00000003
-#define SMALL_SPRITE_DROP 0x00000004
-
-uint32_t initThread(void);
-uint32_t systemcall(uint32_t funName);
-
 TContext newThread;
 int mode = 0; // 0 = text mode, 1 = graphics mode
 
