@@ -136,6 +136,7 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     case MODE_STATUS:
         return MODE_CONTROL_REG;
         break;
+
     case SMALL_SPRITE_DROP:
         smallspritecontrol[0] += 0x00001000;
         return 1;

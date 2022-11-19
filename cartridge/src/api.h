@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef __API_H_
+#define __API_H_
 #include <stdint.h>
 
 typedef uint32_t *TContext;
@@ -18,5 +18,10 @@ typedef void (*TEntry)(void *);
 
 uint32_t initThread(void);
 uint32_t systemcall(uint32_t funName);
+
+uint32_t getTimer();
+uint32_t getStatus();
+uint32_t getMode();
+uint32_t spriteDrop();
 
 #endif

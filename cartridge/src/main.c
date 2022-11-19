@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "main.h"
+#include "api.h"
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
@@ -44,7 +44,7 @@ int main()
 
     while (1)
     {
-        global = systemcall(SYSTIMER);
+        global = getTimer(); // systemcall(SYSTIMER);
         if (global != last_global)
         {
             mode = systemcall(MODE_STATUS);
