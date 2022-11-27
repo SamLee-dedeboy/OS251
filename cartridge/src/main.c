@@ -10,7 +10,7 @@ int mode = 0; // 0 = text mode, 1 = graphics mode
 
 int main()
 {
-    newThread = initThread();
+    // newThread = initThread();
 
     // Sprite Memory Data
     for (int sp_index = 0; sp_index < 128; sp_index++)
@@ -44,21 +44,16 @@ int main()
 
     while (1)
     {
-        global = getTimer(); // systemcall(SYSTIMER);
+        global = getTimer();// systemcall(SYSTIMER);
         if (global != last_global)
         {
-            mode = systemcall(MODE_STATUS);
+            mode = getMode();// systemcall(MODE_STATUS);
             if (mode == 1)
             {
-                // TODO: add response to controller status & bound checks
-                // ctr_bits = 000 1111 1111 000010000 00 0001 0000 00
-                // dx = 000 0000 0000 00000 0001 0000 0000 0000
-                systemcall(SMALL_SPRITE_DROP);
-                // continue;
-                // (*((volatile uint32_t *)0x500FF214 + 0)) += 0x00001000;
+                spriteDrop();
             }
 
-            controller_status = systemcall(CONTROLLER_STATUS); // getStatus();
+            controller_status = getStatus();
             if (controller_status)
             {
                 if (mode == 0)
