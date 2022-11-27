@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "Systemcall.h"
 
 extern uint8_t _erodata[];
 extern uint8_t _data[];
@@ -47,10 +48,6 @@ __attribute__((always_inline)) inline void csr_disable_interrupts(void)
 #define MTIMECMP_HIGH (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 #define MODE_CONTROL_REG (*((volatile uint32_t *)0x500FF414))
-#define SYSTIMER 0x00000001
-#define CONTROLLER_STATUS 0x00000002
-#define MODE_STATUS 0x00000003
-#define SMALL_SPRITE_DROP 0x00000004
 
 volatile uint32_t *smallspritecontrol = (volatile uint32_t *)(0x500FF214);
 

@@ -16,7 +16,6 @@ uint32_t setImagePalette(uint32_t image, uint32_t palette){
 }
 
 uint32_t setPalette(uint32_t background, uint32_t* buff){
-
 	return -1;
 }
 
