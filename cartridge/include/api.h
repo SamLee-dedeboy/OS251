@@ -6,10 +6,6 @@ typedef uint32_t *TContext;
 typedef void (*TEntry)(void *);
 
 // define sys call func parameters
-#define SYSTIMER 0x00000001
-#define CONTROLLER_STATUS 0x00000002
-#define MODE_STATUS 0x00000003
-#define SMALL_SPRITE_DROP 0x00000004
 #define MTIME_LOW (*((volatile uint32_t *)0x40000008))
 #define MTIME_HIGH (*((volatile uint32_t *)0x4000000C))
 #define MTIMECMP_LOW (*((volatile uint32_t *)0x40000010))

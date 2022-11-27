@@ -141,28 +141,11 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
         smallspritecontrol[0] += 0x00001000;
         return 1;
     }
-    // if (call == 0)
-    // {
-    //     return global;
-    // }
-    // else if (call == 1)
-    // {
-    //     return CONTROLLER;
-    // }
-    // else if (call == 2)
-    // {
-    //     return MODE_CONTROL_REG;
-    // }
-    // else
+    // Thread
     if (call == 3)
     {
         uint32_t ThreadStack[128];
         return InitContext(ThreadStack + 128, (void *)0, (void *)0);
-    }
-    else if (call == 4)
-    { // small sprite move down
-        smallspritecontrol[0] += 0x00001000;
-        return 1;
     }
     return -1;
 }

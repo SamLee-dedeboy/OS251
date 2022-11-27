@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "api.h"
+#include "Systemcall.h"
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
@@ -44,10 +45,10 @@ int main()
 
     while (1)
     {
-        global = getTimer();// systemcall(SYSTIMER);
+        global =  systemcall(SYSTIMER); // Todo: Can not use getTimer()
         if (global != last_global)
         {
-            mode = getMode();// systemcall(MODE_STATUS);
+            mode = getMode();
             if (mode == 1)
             {
                 spriteDrop();
