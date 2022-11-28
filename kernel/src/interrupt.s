@@ -1,5 +1,5 @@
 .section .text, "ax"
-.global _interrupt_handler, InitContext,SwitchContext
+.global _interrupt_handler, InitContext, SwitchContext
 _interrupt_handler:
     csrw    mscratch,ra
     csrr    ra,mcause
@@ -35,7 +35,7 @@ _interrupt_handler:
     lw	    a3,8(sp)
     lw	    a4,4(sp)
     lw	    a5,0(sp)
-    addi    sp,sp,40
+    addi    sp,sp,44
     mret
 _system_call:
     csrr    ra,mscratch
