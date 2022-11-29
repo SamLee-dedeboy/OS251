@@ -94,7 +94,6 @@ volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
 int color = 1;
 int color_counter = 0;
 
-volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
 void c_interrupt_handler(uint32_t mcause)
 {
     uint64_t NewCompare = (((uint64_t)MTIMECMP_HIGH) << 32) | MTIMECMP_LOW;
