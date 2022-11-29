@@ -57,19 +57,6 @@ void init(void)
     uint8_t *Base = _data < _sdata ? _data : _sdata;
     uint8_t *End = _edata > _esdata ? _edata : _esdata;
 
-    /*Sprite Control and palette initialized
-        ctr_bits = 0001 1111 1110 0001 0000 0000 0100 0000 */
-    volatile uint32_t *palette0 = (volatile uint32_t *)(0x500FD000);
-    volatile uint32_t *palette1 = (volatile uint32_t *)(0x500FD400);
-
-    // init small sprite location
-    smallspritecontrol[0] = 0x1fc10040;
-
-    for (int i = 0; i < 256; i++)
-    {
-        palette0[i] = 0xff000000 + i;
-        // palette1[i] = 0xff0000ff - i;
-    }
 
     while (Base < End)
     {
@@ -108,8 +95,24 @@ void c_interrupt_handler(uint32_t mcause)
     {
         if (MODE_CONTROL_REG == 0x1)
             MODE_CONTROL_REG = 0x00000000;
-        else if (MODE_CONTROL_REG == 0x0)
+        else if (MODE_CONTROL_REG == 0x0) {
             MODE_CONTROL_REG = 0x00000001;
+            /*Sprite Control and palette initialized
+                ctr_bits = 0001 1111 1110 0001 0000 0000 0100 0000 */
+            volatile uint32_t *palette0 = (volatile uint32_t *)(0x500FD000);
+            volatile uint32_t *palette1 = (volatile uint32_t *)(0x500FD400);
+
+
+            for (int i = 0; i < 256; i++)
+            {
+                palette0[i] = 0xff000000 + i;
+                // palette1[i] = 0xff0000ff - i;
+            }
+
+            // init small sprite location
+            // 0x 000 1111 1110 000010000 0000010000 00
+            smallspritecontrol[0] = 0x1fc10040;
+        }
     }
     (*INT_PENDING_REG) |= ~(1U << 2);
     // CMD control end
