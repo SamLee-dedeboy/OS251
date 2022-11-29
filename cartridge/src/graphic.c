@@ -1,19 +1,16 @@
-#include <stdint.h>
 #include "graphic.h"
 
 volatile uint8_t *BACKGROUND_DATA = (volatile uint8_t *)(0x50000000);
-uint32_t LARGE_SPRITE_DATA_ADDRESS = 0x500B4000;
-uint32_t SMALL_SPRITE_DATA_ADDRESS = 0x500F4000;
+#define LARGE_SPRITE_DATA_ADDRESS 0x500B4000
+#define SMALL_SPRITE_DATA_ADDRESS 0x500F4000
 
 volatile uint32_t *BACKGROUND_PALLETE = (volatile uint32_t *)(0x500FC000);
-// volatile uint32_t *SPRITE_PALLETE = (volatile uint32_t *)(0x500FD000);
 uint32_t SPRITE_PALLETE_ADDRESS = 0x500FD000;
-
 
 volatile char *TEXT_DATA = (volatile char *)(0x500FE800);
 volatile uint32_t *BACKGROUND_CONTROL = (volatile uint32_t *)(0x500FF100);
-uint32_t LARGE_SPRITE_CONTROL_ADDRESS = 0x500FF114;
-uint32_t SMALL_SPRITE_CONTROL_ADDRESS = 0x500FF214;
+#define LARGE_SPRITE_CONTROL_ADDRESS 0x500FF114
+#define SMALL_SPRITE_CONTROL_ADDRESS 0x500FF214
 
 volatile uint32_t *VIDEO_MODE = (volatile uint32_t *)(0x500FF414);
 
@@ -38,20 +35,20 @@ void setSpritePalette(uint32_t num, uint32_t ARGB) {
 
 uint32_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num) {
 	uint32_t num;
-	if(w < 16 || h < 16 ) { // create small sprite
+	if(w < 16 && h < 16 ) { // create small sprite
 		if(small_sprite_count >= 128) small_sprite_count = 0;
 		num = small_sprite_count;
 
 		// set sprite data
+		uint8_t *DATA = (volatile uint8_t *)(SMALL_SPRITE_DATA_ADDRESS + (0x100)*small_sprite_count);
 		for(int i = 0; i < 16; i++){
 			for(int j = 0; j < 16; j++){
-				uint8_t *DATA = (volatile uint8_t *)(SMALL_SPRITE_DATA_ADDRESS + (0x1000)*small_sprite_count);
 				DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
         	}
     	}
 
 		// set sprite control
-		uint32_t *CONTROL = (volatile uint8_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x100)*small_sprite_count);
+		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*small_sprite_count);
 		CONTROL[0] = CalcSmallSpriteControl(x, y, w, h, color_num);
 
 		small_sprite_count++;
@@ -61,15 +58,15 @@ uint32_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t col
 		num = 128 + large_sprite_count;
 
 		// set sprite data
+		uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*large_sprite_count);
 		for(int i = 0; i < 64; i++){
 			for(int j = 0; j < 64; j++){
-				uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*large_sprite_count);
 				DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
         	}
 		}
 
 		// set sprite control
-		uint32_t *CONTROL = (volatile uint8_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x100)*large_sprite_count);
+		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*large_sprite_count);
 		CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
 
 		large_sprite_count++;
