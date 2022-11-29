@@ -1,3 +1,8 @@
+#ifndef __INCLUDE_STDINT__
+#define __INCLUDE_STDINT__
+#include <stdint.h>
+#endif
+
 #ifndef SYSTEMCALL_H
 #define SYSTEMCALL_H
 

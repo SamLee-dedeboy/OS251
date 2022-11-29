@@ -1,6 +1,4 @@
-#include <stdint.h>
 #include "api.h"
-#include "Systemcall.h"
 
 uint32_t getTimer()
 {
