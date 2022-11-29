@@ -9,18 +9,10 @@ _start:
     .option pop
     la sp, __stack_top
     add s0, sp, zero
+    la  a5, _interrupt_handler
+    csrw mtvec, a5
     jal ra, init
     nop
     jal zero, main
     .cfi_endproc
-    
-
-.section .text, "ax"
-.global getTicks, getStatus
-getTicks:
-    li a5, 0
-    ecall
-getStatus:
-    li a5, 1
-    ecall
-.end
+    .end

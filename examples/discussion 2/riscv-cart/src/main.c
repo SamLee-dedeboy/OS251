@@ -3,6 +3,9 @@
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 
+uint32_t getTicks(void);
+uint32_t getStatus(void);
+
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 int main() {
     int a = 4;
@@ -26,8 +29,9 @@ int main() {
 
 
     while (1) {
-        int c = a + b + global;
+        global = getTicks();
         if(global != last_global){
+            controller_status = getStatus();
             if(controller_status){
                 VIDEO_MEMORY[x_pos] = ' ';
                 if(controller_status & 0x1){
