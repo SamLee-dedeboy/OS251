@@ -73,6 +73,22 @@ void init(void)
     csr_enable_interrupts(); // Global interrupt enable
     MTIMECMP_LOW = 1;
     MTIMECMP_HIGH = 0;
+
+    /*Sprite Control and palette initialized
+        ctr_bits = 0001 1111 1110 0001 0000 0000 0100 0000 */
+    volatile uint32_t *palette0 = (volatile uint32_t *)(0x500FD000);
+    volatile uint32_t *palette1 = (volatile uint32_t *)(0x500FD400);
+
+
+    for (int i = 0; i < 256; i++)
+    {
+        palette0[i] = 0xff000000 + i;
+        // palette1[i] = 0xff0000ff - i;
+    }
+
+    // init small sprite location
+    // 0x 000 1111 1110 000010000 0000010000 00
+    smallspritecontrol[0] = 0x1fc10040;
 }
 
 extern volatile int global;
@@ -97,21 +113,6 @@ void c_interrupt_handler(uint32_t mcause)
             MODE_CONTROL_REG = 0x00000000;
         else if (MODE_CONTROL_REG == 0x0) {
             MODE_CONTROL_REG = 0x00000001;
-            /*Sprite Control and palette initialized
-                ctr_bits = 0001 1111 1110 0001 0000 0000 0100 0000 */
-            volatile uint32_t *palette0 = (volatile uint32_t *)(0x500FD000);
-            volatile uint32_t *palette1 = (volatile uint32_t *)(0x500FD400);
-
-
-            for (int i = 0; i < 256; i++)
-            {
-                palette0[i] = 0xff000000 + i;
-                // palette1[i] = 0xff0000ff - i;
-            }
-
-            // init small sprite location
-            // 0x 000 1111 1110 000010000 0000010000 00
-            smallspritecontrol[0] = 0x1fc10040;
         }
     }
     (*INT_PENDING_REG) |= ~(1U << 2);
