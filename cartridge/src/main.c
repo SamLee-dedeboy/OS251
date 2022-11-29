@@ -6,12 +6,28 @@ volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
-TContext newThread;
+TContext MainThread;
+TContext OtherThread;
+
 int mode = 0; // 0 = text mode, 1 = graphics mode
+
+uint32_t Thread(void *param)
+{
+    int last_global = 0;
+
+    while (1)
+    {
+        if (last_global != global)
+        {
+            SwitchContext(Thread_SWITCH, &OtherThread, MainThread);
+            last_global = global;
+        }
+    }
+}
 
 int main()
 {
-    // newThread = initThread();
+    OtherThread = thread_init(Thread_INIT, Thread, (void *)0);
 
     // Sprite Memory Data
     for (int sp_index = 0; sp_index < 128; sp_index++)
@@ -45,7 +61,7 @@ int main()
 
     while (1)
     {
-        global =  systemcall(SYSTIMER); // Todo: Can not use getTimer()
+        global = systemcall(SYSTIMER); // Todo: Can not use getTimer()
         if (global != last_global)
         {
             mode = getMode();

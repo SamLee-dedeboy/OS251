@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "Systemcall.h"
+#include "Thread.h"
 
 extern uint8_t _erodata[];
 extern uint8_t _data[];
@@ -57,20 +58,6 @@ void init(void)
     uint8_t *Base = _data < _sdata ? _data : _sdata;
     uint8_t *End = _edata > _esdata ? _edata : _esdata;
 
-    /*Sprite Control and palette initialized
-        ctr_bits = 0001 1111 1110 0001 0000 0000 0100 0000 */
-    volatile uint32_t *palette0 = (volatile uint32_t *)(0x500FD000);
-    volatile uint32_t *palette1 = (volatile uint32_t *)(0x500FD400);
-
-    // init small sprite location
-    smallspritecontrol[0] = 0x1fc10040;
-
-    for (int i = 0; i < 256; i++)
-    {
-        palette0[i] = 0xff000000 + i;
-        // palette1[i] = 0xff0000ff - i;
-    }
-
     while (Base < End)
     {
         *Base++ = *Source++;
@@ -86,6 +73,21 @@ void init(void)
     csr_enable_interrupts(); // Global interrupt enable
     MTIMECMP_LOW = 1;
     MTIMECMP_HIGH = 0;
+
+    /*Sprite Control and palette initialized
+        ctr_bits = 0001 1111 1110 0001 0000 0000 0100 0000 */
+    volatile uint32_t *palette0 = (volatile uint32_t *)(0x500FD000);
+    volatile uint32_t *palette1 = (volatile uint32_t *)(0x500FD400);
+
+    for (int i = 0; i < 256; i++)
+    {
+        palette0[i] = 0xff000000 + i;
+        // palette1[i] = 0xff0000ff - i;
+    }
+
+    // init small sprite location
+    // 0x 000 1111 1110 000010000 0000010000 00
+    smallspritecontrol[0] = 0x1fc10040;
 }
 
 extern volatile int global;
@@ -113,11 +115,6 @@ void c_interrupt_handler(uint32_t mcause)
     // CMD control end
 }
 
-typedef uint32_t *TContext;
-typedef void (*TEntry)(void *);
-
-TContext InitContext(uint32_t *stacktop, TEntry entry, void *param);
-
 uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t call)
 {
     switch (a0)
@@ -137,12 +134,17 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     case SMALL_SPRITE_DROP:
         smallspritecontrol[0] += 0x00001000;
         return 1;
-    }
-    // Thread
-    if (call == 3)
-    {
+        break;
+
+    case Thread_INIT:
         uint32_t ThreadStack[128];
-        return InitContext(ThreadStack + 128, (void *)0, (void *)0);
+        return CPUContextInitialize(ThreadStack + 128, (TContext)a1, (void *)a2);
+        break;
+
+    case Thread_SWITCH:
+        return 1;
+        break;
     }
+
     return -1;
 }
