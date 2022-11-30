@@ -29,9 +29,14 @@ int main()
     int last_global = 42;
     int x_pos = 12;
 
+    uint32_t rand;
     int last_update = 42;
     int drop_counter = 0;
-    uint32_t current_block;
+    int rotate_counter = 0;
+    uint32_t *current_blocks;
+    int block_length = 30;
+    int b_pos_x = 0;
+    int b_pos_y = 0;
 
     VIDEO_MEMORY[0] = 'h';
     VIDEO_MEMORY[1] = 'e';
@@ -51,6 +56,7 @@ int main()
     while (1)
     {
         global =  systemcall(SYSTIMER); // Todo: Can not use getTimer()
+        controller_status = getStatus();
         if (global != last_global)
         {
             mode = getMode();
@@ -58,63 +64,89 @@ int main()
             {
                 // spriteDrop();
 
-                setSpritePalette(0, 0xFFFF0000);
-                setSpritePalette(1, 0xFF0000FF);
+                setSpritePalette(0, 0xFFFF0000); // Red
+                setSpritePalette(1, 0xFF0000FF); // Blue
+                setSpritePalette(2, 0xFF555555); // gray for dropped down blocks.
                 // uint32_t block_1     = createBlock(100, 200, 10, 10, 0, 0);
                 // uint32_t sprite_5 = createSprite(100, 200, 10, 60, 1);
 
-                // uint32_t rand = random();
-                uint32_t rand = 0;
                 if (block_created==0) {
-                    current_block = createBlock(0, 0, 30, 30, 0, rand);
+                    // TODO: rand = random();
+                    rand = 0;
+                    current_blocks = createBlock(0, 0, block_length, block_length, 0, rand);
                     block_created = 1;
                     last_update = global;
                     drop_counter = 0;
                 }
-                else if ((global-last_update)==100){
-                    drop_counter += 1;
-                    dropBlock(0, 0+30*drop_counter, 30, 30, 0, rand);
-                    last_update = global;
+                else {
+                    if ((global-last_update)>=100) {
+                        drop_counter += 1;
+                        // TODO: add hit bottom detection.
+                        b_pos_y += block_length*drop_counter;
+                        dropBlock(b_pos_x, b_pos_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
+                        last_update = global;
+                    }
+                    if (controller_status & 0x1) {
+                        // left
+                        if (b_pos_x >= block_length) b_pos_x -= block_length;
+                        dropBlock(b_pos_x, b_pos_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
+                    }
+                    else if (controller_status & 0x8) {
+                        // right
+                        if (rand==0)
+                            if (b_pos_x < 510-3*block_length) b_pos_x += block_length;
+                        dropBlock(b_pos_x, b_pos_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
+                    }
+                    else if (controller_status & 0x2) {
+                        // TODO: up (rotate)
+                        rotate_counter += 1;
+                        dropBlock(b_pos_x, b_pos_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
+                        if (rotate_counter == 4)    rotate_counter = 0;
+                    }
+                    else if (controller_status & 0x4) {
+                        // TODO: down (hard drop)
+                        // put down block to background
+                        // reset block_created, b_pos_x, b_pos_y
+                        
+                    }
+                    
                 }
             }
 
-            controller_status = getStatus();
-            if (controller_status)
+            else if (controller_status)
             {
-                if (mode == 0)
+                VIDEO_MEMORY[x_pos] = ' ';
+                if (controller_status & 0x1)
                 {
-                    VIDEO_MEMORY[x_pos] = ' ';
-                    if (controller_status & 0x1)
+                    if (x_pos & 0x3F)
                     {
-                        if (x_pos & 0x3F)
-                        {
-                            x_pos--;
-                        }
+                        x_pos--;
                     }
-                    if (controller_status & 0x2)
-                    {
-                        if (x_pos >= 0x40)
-                        {
-                            x_pos -= 0x40;
-                        }
-                    }
-                    if (controller_status & 0x4)
-                    {
-                        if (x_pos < 0x8C0)
-                        {
-                            x_pos += 0x40;
-                        }
-                    }
-                    if (controller_status & 0x8)
-                    {
-                        if ((x_pos & 0x3F) != 0x3F)
-                        {
-                            x_pos++;
-                        }
-                    }
-                    VIDEO_MEMORY[x_pos] = 'X';
                 }
+                if (controller_status & 0x2)
+                {
+                    if (x_pos >= 0x40)
+                    {
+                        x_pos -= 0x40;
+                    }
+                }
+                if (controller_status & 0x4)
+                {
+                    if (x_pos < 0x8C0)
+                    {
+                        x_pos += 0x40;
+                    }
+                }
+                if (controller_status & 0x8)
+                {
+                    if ((x_pos & 0x3F) != 0x3F)
+                    {
+                        x_pos++;
+                    }
+                }
+                VIDEO_MEMORY[x_pos] = 'X';
             }
+
             last_global = global;
         }
     }
