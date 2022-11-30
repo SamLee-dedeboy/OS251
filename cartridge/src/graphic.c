@@ -75,6 +75,51 @@ uint32_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t col
 	return num;
 }
 
+uint32_t createBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id) {
+	uint32_t sprite_1;
+	uint32_t sprite_2;
+	uint32_t sprite_3;
+	uint32_t sprite_4;
+
+	if (block_id == 0) {
+		// A
+		// AAA
+		sprite_1 = createSprite(x, y, w, h, color_num);
+		sprite_2 = createSprite(x, y+h, w, h, color_num);
+		sprite_3 = createSprite(x+w, y+h, w, h, color_num);
+		sprite_4 = createSprite(x+w*2, y+h, w, h, color_num);
+	}
+
+	return sprite_4;
+}
+
+uint32_t dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id) {
+	for (int tmp=0; tmp<4; tmp++) {
+		if (block_id==0) {
+			if (tmp==1)	y += h;
+			else if (tmp==2) x += w;
+			else if (tmp==3) x += w;
+		}
+		// set sprite data
+		uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*tmp);
+		for(int i = 0; i < 64; i++){
+			for(int j = 0; j < 64; j++){
+				DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
+			}
+		}
+
+		// set sprite control
+		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*tmp);
+		CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
+	}
+	
+	return 4;
+}
+
+uint32_t clearBlock(){
+
+}
+
 void changeSpriteColor(uint32_t sprite_num, uint32_t color_num) {
 	if (sprite_num < 128 ) { // small sprite
 		uint32_t *CONTROL = (volatile uint8_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x100)*sprite_num);
