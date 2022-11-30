@@ -27,7 +27,7 @@ uint32_t Thread(void *param)
 
 int main()
 {
-    OtherThread = thread_init(Thread_INIT, Thread, (void *)0);
+    // thread_init(Thread_INIT, Thread, (void *)0);
 
     // Sprite Memory Data
     for (int sp_index = 0; sp_index < 128; sp_index++)

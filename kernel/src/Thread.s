@@ -1,7 +1,7 @@
 .section .text, "ax"
-.global InitContext, SwitchContext
+.global CPUContextInitialize, CPUContextSwitch
 
-InitContext:
+CPUContextInitialize:
     addi    a0,a0,-56
     sw      a1,52(a0)
     sw      gp,48(a0)
@@ -19,7 +19,7 @@ InitContext:
     sw      zero,0(a0)
     ret
 
-SwitchContext:
+CPUContextSwitch:
     addi	sp,sp,-56
     sw      ra,52(sp)
     sw      gp,48(sp)

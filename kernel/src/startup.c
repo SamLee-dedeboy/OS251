@@ -94,6 +94,10 @@ extern volatile int global;
 extern volatile uint32_t controller_status;
 
 volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
+void thread_timer_scheduler()
+{
+}
+
 void c_interrupt_handler(uint32_t mcause)
 {
     uint64_t NewCompare = (((uint64_t)MTIMECMP_HIGH) << 32) | MTIMECMP_LOW;
@@ -138,11 +142,11 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
 
     case Thread_INIT:
         uint32_t ThreadStack[128];
-        return CPUContextInitialize(ThreadStack + 128, (TContext)a1, (void *)a2);
+        CPUContextInitialize(ThreadStack + 128, (TContext)a1, (void *)a2);
         break;
 
     case Thread_SWITCH:
-        return 1;
+        CPUContextSwitch((TContext *)a1, (TContext)a2);
         break;
     }
 

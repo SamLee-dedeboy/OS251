@@ -33,4 +33,3 @@ uint32_t CalcSmallSpriteControl(int32_t x, int32_t y, uint32_t w, uint32_t h, ui
 // uint32_t clearTextScreen();
 
 #endif
-Footer
