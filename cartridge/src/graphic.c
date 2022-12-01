@@ -19,7 +19,7 @@ uint32_t SystemCall(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t
 // num of sprites: 0~127: small sprite; 128~191: large sprite
 int small_sprite_count = 0; // max: 128 small sprites
 int large_sprite_count = 0; // max: 64 large sprites
-int background_count = 0;
+int down_sprite_count = 0; 
 
 
 void setVideoMode(int mode) {
@@ -70,6 +70,7 @@ uint32_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t col
 		CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
 
 		large_sprite_count++;
+		down_sprite_count++;
 	}
 
 	return num;
@@ -142,8 +143,57 @@ void dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num,
 	}
 }
 
-uint32_t clearBlock(){
-	
+void clearBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, uint32_t *current_blocks, int rotate_id){
+	// large_sprite_count = 0;
+	for (int tmp=0; tmp<4; tmp++) {
+		if (block_id==0) {
+			if (rotate_id%4==0) {
+				//B
+				//BBB
+				if (tmp==1)	y += h;
+				else if (tmp==2) x += w;
+				else if (tmp==3) x += w;
+			}
+			else if (rotate_id%4==1) {
+				//BB
+				//B
+				//B
+				if (tmp==1) y += h;
+				else if (tmp==2) y += h;
+				else if (tmp==3) {
+					x += w;
+					y -= 2*h;
+				}
+			}
+			else if (rotate_id%4==2) {
+				//BBB
+				//  B
+				if (tmp==1) x += w;
+				else if (tmp==2) x += w;
+				else if (tmp==3) y += h;
+			}
+			else if (rotate_id%4==3) {
+				// B
+				// B
+				//BB
+				if (tmp==0) x += w;
+				else if (tmp==1) y += h;
+				else if (tmp==2) y += h;
+				else if (tmp==3) x -= w;
+			}
+		}
+		// set dropped sprite data to the back
+		uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(64-down_sprite_count+tmp));
+		for(int i = 0; i < 64; i++){
+			for(int j = 0; j < 64; j++){
+				DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
+			}
+		}
+
+		// set dropped sprite control to the back
+		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(64-down_sprite_count+tmp));
+		CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
+	}
 }
 
 void changeSpriteColor(uint32_t sprite_num, uint32_t color_num) {

@@ -9,6 +9,65 @@ volatile uint32_t controller_status = 0;
 TContext newThread;
 int mode = 0; // 0 = text mode, 1 = graphics mode
 int block_created = 0; // 0: not created yet, 1: already created.
+uint32_t rand;
+int last_update = 42;
+int rotate_counter = 0;
+uint32_t *current_blocks;
+int block_length = 30;
+int b_pos_x = 0;
+int b_pos_y = 0;
+int b_offset_x = 151;
+int b_offset_y = 9;
+int down_block[9][7];
+
+void reset_block() {
+    if (rand==0) {
+        if (rotate_counter%4==0 || rotate_counter%4==2) {
+            if (b_pos_y+2 >= 9) {
+                // clearBlock();
+                clearBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 2, rand, current_blocks, rotate_counter);
+                block_created = 0;
+                b_pos_x = 0;
+                b_pos_y = 0;
+                rotate_counter = 0;
+                if (rotate_counter%4==0){
+                    down_block[b_pos_x][b_pos_y] = 1;
+                    down_block[b_pos_x+1][b_pos_y] = 1;
+                    down_block[b_pos_x+1][b_pos_y+1] = 1;
+                    down_block[b_pos_x+1][b_pos_y+2] = 1;
+                }
+                else {
+                    down_block[b_pos_x][b_pos_y] = 1;
+                    down_block[b_pos_x+1][b_pos_y] = 1;
+                    down_block[b_pos_x+2][b_pos_y] = 1;
+                    down_block[b_pos_x+2][b_pos_y+1] = 1;
+                }
+            }
+        }
+        else if (rotate_counter%4==1 || rotate_counter%4==3) {
+            if (b_pos_y+3 >= 9) {
+                // clearBlock();
+                clearBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 2, rand, current_blocks, rotate_counter);
+                block_created = 0;
+                b_pos_x = 0;
+                b_pos_y = 0;
+                rotate_counter = 0;
+                if (rotate_counter%4==1){
+                    down_block[b_pos_x][b_pos_y] = 1;
+                    down_block[b_pos_x+1][b_pos_y] = 1;
+                    down_block[b_pos_x][b_pos_y+1] = 1;
+                    down_block[b_pos_x][b_pos_y+2] = 1;
+                }
+                else {
+                    down_block[b_pos_x+1][b_pos_y] = 1;
+                    down_block[b_pos_x+1][b_pos_y+1] = 1;
+                    down_block[b_pos_x+1][b_pos_y+2] = 1;
+                    down_block[b_pos_x][b_pos_y+2] = 1;
+                }
+            }
+        }
+    }
+}
 
 int main()
 {
@@ -29,14 +88,10 @@ int main()
     int last_global = 42;
     int x_pos = 12;
 
-    uint32_t rand;
-    int last_update = 42;
-    int drop_counter = 0;
-    int rotate_counter = 0;
-    uint32_t *current_blocks;
-    int block_length = 30;
-    int b_pos_x = 0;
-    int b_pos_y = 0;
+    for (int i=0; i<9; i++) {
+        for (int j=0; j<9; j++)
+            down_block[i][j] = 0;
+    }
 
     VIDEO_MEMORY[0] = 'h';
     VIDEO_MEMORY[1] = 'e';
@@ -73,40 +128,48 @@ int main()
                 if (block_created==0) {
                     // TODO: rand = random();
                     rand = 0;
-                    current_blocks = createBlock(0, 0, block_length, block_length, 0, rand);
+                    current_blocks = createBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand);
                     block_created = 1;
                     last_update = global;
-                    drop_counter = 0;
                 }
                 else {
                     if ((global-last_update)>=100) {
-                        drop_counter += 1;
                         // TODO: add hit bottom detection.
-                        b_pos_y += block_length*drop_counter;
-                        dropBlock(b_pos_x, b_pos_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
+                        b_pos_y += 1;
+                        dropBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
                         last_update = global;
+                        reset_block();
                     }
                     if (controller_status & 0x1) {
                         // left
-                        if (b_pos_x >= block_length) b_pos_x -= block_length;
-                        dropBlock(b_pos_x, b_pos_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
+                        if (b_pos_x >= 1)   b_pos_x -= 1;
+                        dropBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
                     }
                     else if (controller_status & 0x8) {
                         // right
-                        if (rand==0)
-                            if (b_pos_x < 510-3*block_length) b_pos_x += block_length;
-                        dropBlock(b_pos_x, b_pos_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
+                        if (rand==0) {
+                            if (rotate_counter%4==0 || rotate_counter%4==2) {
+                                if (b_pos_x+3 < 7)   b_pos_x += 1;
+                            }
+                            else {
+                                if (b_pos_x+2 < 7)   b_pos_x += 1;
+                            }
+                        }
+                        // if (rand==0)
+                        //     if (b_pos_x < 510-3*block_length) b_pos_x += 1;
+                        dropBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
                     }
                     else if (controller_status & 0x2) {
                         // TODO: up (rotate)
                         rotate_counter += 1;
-                        dropBlock(b_pos_x, b_pos_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
+                        dropBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand, current_blocks, rotate_counter);
                         if (rotate_counter == 4)    rotate_counter = 0;
                     }
                     else if (controller_status & 0x4) {
                         // TODO: down (hard drop)
                         // put down block to background
                         // reset block_created, b_pos_x, b_pos_y
+                        // check if a line has been filled.
                         
                     }
                     
