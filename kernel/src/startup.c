@@ -1,6 +1,8 @@
 #include <stdint.h>
-#include "Systemcall.h"
+#include <stdio.h>
 #include "Thread.h"
+#include "Chip.h"
+#include "Systemcall.h"
 
 extern uint8_t _erodata[];
 extern uint8_t _data[];
@@ -10,47 +12,22 @@ extern uint8_t _esdata[];
 extern uint8_t _bss[];
 extern uint8_t _ebss[];
 
-// Adapted from https://stackoverflow.com/questions/58947716/how-to-interact-with-risc-v-csrs-by-using-gcc-c-code
-__attribute__((always_inline)) inline uint32_t csr_mstatus_read(void)
-{
-    uint32_t result;
-    asm volatile("csrr %0, mstatus"
-                 : "=r"(result));
-    return result;
-}
-
-__attribute__((always_inline)) inline void csr_mstatus_write(uint32_t val)
-{
-    asm volatile("csrw mstatus, %0"
-                 :
-                 : "r"(val));
-}
-
-__attribute__((always_inline)) inline void csr_write_mie(uint32_t val)
-{
-    asm volatile("csrw mie, %0"
-                 :
-                 : "r"(val));
-}
-
-__attribute__((always_inline)) inline void csr_enable_interrupts(void)
-{
-    asm volatile("csrsi mstatus, 0x8");
-}
-
-__attribute__((always_inline)) inline void csr_disable_interrupts(void)
-{
-    asm volatile("csrci mstatus, 0x8");
-}
-
-#define MTIME_LOW (*((volatile uint32_t *)0x40000008))
-#define MTIME_HIGH (*((volatile uint32_t *)0x4000000C))
-#define MTIMECMP_LOW (*((volatile uint32_t *)0x40000010))
-#define MTIMECMP_HIGH (*((volatile uint32_t *)0x40000014))
-#define CONTROLLER (*((volatile uint32_t *)0x40000018))
-#define MODE_CONTROL_REG (*((volatile uint32_t *)0x500FF414))
+typedef int bool;
+#define true 1
+#define false 0
 
 volatile uint32_t *smallspritecontrol = (volatile uint32_t *)(0x500FF214);
+
+// Thread variable
+TContext ThreadPointers[MAX_THREAD_NUM];
+int current_thread_num = 1;
+int running_thread_pointer = 0;
+
+volatile uint32_t *IER = (volatile uint32_t *)(0x40000000);
+volatile uint32_t *IPR = (volatile uint32_t *)(0x40000004);
+
+volatile int global = 0;
+volatile int video = 0;
 
 void init(void)
 {
@@ -73,11 +50,13 @@ void init(void)
     csr_enable_interrupts(); // Global interrupt enable
     MTIMECMP_LOW = 1;
     MTIMECMP_HIGH = 0;
+    *IER = *IER | COMMAND_BIT;
+    *IER = *IER | VIDEO_BIT;
+    *IER = *IER | CART_BIT;
 
-    /*Sprite Control and palette initialized
-        ctr_bits = 0001 1111 1110 0001 0000 0000 0100 0000 */
-    volatile uint32_t *palette0 = (volatile uint32_t *)(0x500FD000);
-    volatile uint32_t *palette1 = (volatile uint32_t *)(0x500FD400);
+    // palette initialized
+    volatile uint32_t *palette0 = (volatile uint32_t *)0x500FD000;
+    volatile uint32_t *palette1 = (volatile uint32_t *)0x500FD400;
 
     for (int i = 0; i < 256; i++)
     {
@@ -90,65 +69,108 @@ void init(void)
     smallspritecontrol[0] = 0x1fc10040;
 }
 
-extern volatile int global;
-extern volatile uint32_t controller_status;
-
-volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
-void thread_timer_scheduler()
+void c_interrupt_handler(void)
 {
+    uint32_t mcause = csr_mcause_read();
+    switch (mcause)
+    {
+    case TIMER_INTERRUPT:
+        thread_timer_scheduel();
+        break;
+    case EXTERNAL_INTERRUPT:
+    {
+        if (*IPR & COMMAND_BIT)
+        {
+            cmd_interrupt();
+            return;
+        }
+        if (*IPR & VIDEO_BIT)
+        {
+            video_interrupt();
+            return;
+        }
+    }
+    default:
+        break;
+    }
 }
 
-void c_interrupt_handler(uint32_t mcause)
+void thread_timer_scheduel()
 {
     uint64_t NewCompare = (((uint64_t)MTIMECMP_HIGH) << 32) | MTIMECMP_LOW;
     NewCompare += 100;
     MTIMECMP_HIGH = NewCompare >> 32;
     MTIMECMP_LOW = NewCompare;
     global++;
-    controller_status = CONTROLLER;
-
-    // CMD control
-    if ((((*INT_PENDING_REG) & 0x4) >> 2))
+    if (global % 500 == 0 && current_thread_num > 1)
     {
-        if (MODE_CONTROL_REG == 0x1)
-            MODE_CONTROL_REG = 0x00000000;
-        else if (MODE_CONTROL_REG == 0x0)
-            MODE_CONTROL_REG = 0x00000001;
+        uint32_t mepc = csr_mepc_read();
+        TContextState PrevState = CPUHALSuspendInterrupts();
+        ContextSwitch(&ThreadPointers[running_thread_pointer], ThreadPointers[(running_thread_pointer + 1) % current_thread_num]);
+        running_thread_pointer++;
+        csr_write_mepc(mepc);
+        CPUHALResumeInterrupts(PrevState);
     }
-    (*INT_PENDING_REG) |= ~(1U << 2);
-    // CMD control end
+    if (global == 9999)
+    {
+        global = 0;
+    }
 }
 
-uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t call)
+void cmd_interrupt()
 {
-    switch (a0)
+    if (MODE_CONTROL & 1)
+    {
+        MODE_CONTROL = 0x00000000;
+    }
+    else
+    {
+        MODE_CONTROL = 0x00000001;
+    }
+    *IPR = *IPR & COMMAND_BIT;
+}
+
+void video_interrupt()
+{
+    video++;
+    if (video >= 1000)
+    {
+        video = 0;
+    }
+    *IPR = *IPR & VIDEO_BIT;
+}
+
+uint32_t c_syscall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t param4)
+{
+    switch (param1)
     {
     case SYSTIMER:
         return global;
         break;
-
     case CONTROLLER_STATUS:
         return CONTROLLER;
         break;
-
     case MODE_STATUS:
-        return MODE_CONTROL_REG;
+        return MODE_CONTROL;
         break;
-
     case SMALL_SPRITE_DROP:
         smallspritecontrol[0] += 0x00001000;
         return 1;
         break;
-
+    case WRITE_TEXT:
+        printf((char *)param2, (int)param3);
+        fflush(stdout);
+        break;
     case Thread_INIT:
         uint32_t ThreadStack[128];
-        CPUContextInitialize(ThreadStack + 128, (TContext)a1, (void *)a2);
+        if (current_thread_num <= MAX_THREAD_NUM - 1)
+        {
+            ThreadPointers[current_thread_num++] = ContextInitialize((TContext)(ThreadStack + 128), (TContextEntry)param2, (void *)param3);
+        }
+        printf((char *)current_thread_num, (int)current_thread_num);
+        fflush(stdout);
         break;
-
-    case Thread_SWITCH:
-        CPUContextSwitch((TContext *)a1, (TContext)a2);
+    default:
         break;
     }
-
-    return -1;
 }

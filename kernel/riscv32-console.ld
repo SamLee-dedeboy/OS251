@@ -13,7 +13,7 @@ MEMORY
     /* riscv-console virt machine FLASH */
     FLASH (rx)  : ORIGIN = 0x00000000, LENGTH = 16M
     /* riscv-console virt machine RAM */
-    RAM (rwx)   : ORIGIN = 0x70000000, LENGTH = 8M
+    RAM (rwx)   : ORIGIN = 0x70000000, LENGTH = 6M
     
 }
 ENTRY(_start)
@@ -82,5 +82,6 @@ SECTIONS
 
     __global_pointer$ = MIN(_sdata + 0x800,
 		            MAX(_data + 0x800, _ebss - 0x800));
+    _heapbase = MAX(_edata,MAX(_esdata,_ebss));
 
 }

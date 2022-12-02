@@ -13,4 +13,5 @@
 #define Thread_INIT 0x00000005
 #define Thread_SWITCH 0x00000006
 
+#define WRITE_TEXT 0x00000007
 #endif

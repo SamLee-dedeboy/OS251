@@ -1,27 +1,28 @@
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "api.h"
 #include "Systemcall.h"
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
+
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 TContext MainThread;
 TContext OtherThread;
 
 int mode = 0; // 0 = text mode, 1 = graphics mode
+uint32_t my_printf(uint32_t funName, char *text, int variable);
 
 uint32_t Thread(void *param)
 {
-    int last_global = 0;
-
     while (1)
     {
-        if (last_global != global)
-        {
-            SwitchContext(Thread_SWITCH, &OtherThread, MainThread);
-            last_global = global;
-        }
+        global = systemcall(SYSTIMER);
+        printtext(WRITE_TEXT, "Thread:      %d\n", global);
+        // my_printf(WRITE_TEXT, "Thread: %d\r", global);
+        // fflush(stdout);
     }
 }
 
@@ -58,6 +59,8 @@ int main()
     VIDEO_MEMORY[11] = '!';
     VIDEO_MEMORY[12] = 'X';
     (*INT_ENABLE_REG) = 0x7;
+
+    printtext(WRITE_TEXT, "value_malloc：      %d\n", global);
 
     while (1)
     {

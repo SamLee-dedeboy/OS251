@@ -16,9 +16,10 @@ _start:
     
 
 .section .text, "ax"
-.global systemcall, thread_init, SwitchContext
+.global systemcall, thread_init, printtext,SwitchContext
 systemcall:
 thread_init:
+printtext:
 SwitchContext:
     ecall
 .end

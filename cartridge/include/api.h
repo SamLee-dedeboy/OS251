@@ -18,6 +18,7 @@
 typedef uint32_t *TContext;
 typedef uint32_t (*TEntry)(void *param);
 
+uint32_t printtext(uint32_t funName, char *text, int variable);
 TContext thread_init(uint32_t funName, TEntry entry, void *param);
 void SwitchContext(uint32_t funName, TContext *old, TContext new);
 uint32_t systemcall(uint32_t funName);
