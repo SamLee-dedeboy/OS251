@@ -1,13 +1,13 @@
 #include <stdint.h>
 #include "api.h"
-#include "Systemcall.h"
+#include "systemcall.h"
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 TContext newThread;
-int mode = 0; // 0 = text mode, 1 = graphics mode
+int mode = TEXT_MODE; // TEXT_MODE = 0, GRAPHICS_MODE = 1
 int block_created = 0; // 0: not created yet, 1: already created.
 uint32_t rand;
 int last_update = 42;
@@ -70,7 +70,7 @@ void reset_block() {
                     down_block[b_pos_y+1][b_pos_x+2] = 1;
                     line_elimination();
                     if (b_pos_y<2) {
-                        setVideoMode(0);
+                        setVideoMode(TEXT_MODE);
                         block_created = -1; // game over
                     }
                     
@@ -87,7 +87,7 @@ void reset_block() {
                     down_block[b_pos_y+1][b_pos_x+2] = 1;
                     line_elimination();
                     if (b_pos_y<2) {
-                        setVideoMode(0);
+                        setVideoMode(TEXT_MODE);
                         block_created = -1; // game over
                     }
                     
@@ -106,7 +106,7 @@ void reset_block() {
                     down_block[b_pos_y+1][b_pos_x+2] = 1;
                     line_elimination();
                     if (b_pos_y<2) {
-                        setVideoMode(0);
+                        setVideoMode(TEXT_MODE);
                         block_created = -1; // game over
                     }
                     
@@ -123,7 +123,7 @@ void reset_block() {
                     down_block[b_pos_y+1][b_pos_x+2] = 1;
                     line_elimination();
                     if (b_pos_y<2) {
-                        setVideoMode(0);
+                        setVideoMode(TEXT_MODE);
                         block_created = -1; // game over
                     }
                     
@@ -144,7 +144,7 @@ void reset_block() {
                     down_block[b_pos_y+2][b_pos_x] = 1;
                     line_elimination();
                     if (b_pos_y<2) {
-                        setVideoMode(0);
+                        setVideoMode(TEXT_MODE);
                         block_created = -1; // game over
                     }
                     
@@ -161,7 +161,7 @@ void reset_block() {
                     down_block[b_pos_y+2][b_pos_x] = 1;
                     line_elimination();
                     if (b_pos_y<2) {
-                        setVideoMode(0);
+                        setVideoMode(TEXT_MODE);
                         block_created = -1; // game over
                     }
                     
@@ -180,7 +180,7 @@ void reset_block() {
                     down_block[b_pos_y+2][b_pos_x] = 1;
                     line_elimination();
                     if (b_pos_y<2) {
-                        setVideoMode(0);
+                        setVideoMode(TEXT_MODE);
                         block_created = -1; // game over
                     }
                     
@@ -197,7 +197,7 @@ void reset_block() {
                     down_block[b_pos_y+2][b_pos_x] = 1;
                     line_elimination();
                     if (b_pos_y<2) {
-                        setVideoMode(0);
+                        setVideoMode(TEXT_MODE);
                         block_created = -1; // game over
                     }
                     
@@ -213,53 +213,31 @@ void reset_block() {
 
 int main()
 {
-    // newThread = initThread();
-
-    // Sprite Memory Data
-    // for (int sp_index = 0; sp_index < 128; sp_index++)
-    // {
-    //     volatile char *SM_SPRITE_MEMORY_i = (volatile uint8_t *)(0x500F4000 + sp_index * 0x100);
-    //     for (int j = 0; j < 256; j++)
-    //     {
-    //         SM_SPRITE_MEMORY_i[j] = 255;
-    //     }
-    // }
-
-    int a = 4;
-    int b = 12;
+    (*INT_ENABLE_REG) = 0x7; // TODO: remove this from cartridge, move into some api if needed
     int last_global = 42;
     int x_pos = 12;
 
-    VIDEO_MEMORY[0] = 'h';
-    VIDEO_MEMORY[1] = 'e';
-    VIDEO_MEMORY[2] = 'l';
-    VIDEO_MEMORY[3] = 'l';
-    VIDEO_MEMORY[4] = 'o';
-    VIDEO_MEMORY[5] = ' ';
-    VIDEO_MEMORY[6] = 'W';
-    VIDEO_MEMORY[7] = 'o';
-    VIDEO_MEMORY[8] = 'r';
-    VIDEO_MEMORY[9] = 'l';
-    VIDEO_MEMORY[10] = 'd';
-    VIDEO_MEMORY[11] = '!';
-    VIDEO_MEMORY[12] = 'X';
-    (*INT_ENABLE_REG) = 0x7;
+    char *greeting = "TetrisX";
+    drawText(greeting, 7, 27, 17);
+    x_pos = 17*(0x40) + 27 + 7 - 1;
+
+    setVideoMode(TEXT_MODE);
+
+    setSpritePalette(0, 0xFFFF0000); // Red
+    setSpritePalette(1, 0xFF0000FF); // Blue
+    setSpritePalette(2, 0xFF555555); // gray for dropped down blocks.
+    setSpritePalette(3, 0xFF000000); // reset to black.
 
     while (1)
     {
-        global =  systemcall(SYSTIMER); // Todo: Can not use getTimer()
+        global =  systemcall(SYSTIMER); // TODO: Can not use getTimer()
         controller_status = getStatus();
         if (global != last_global)
         {
             mode = getMode();
-            if (mode == 1)
+            if (mode == GRAPHICS_MODE)
             {
                 // spriteDrop();
-
-                setSpritePalette(0, 0xFFFF0000); // Red
-                setSpritePalette(1, 0xFF0000FF); // Blue
-                setSpritePalette(2, 0xFF555555); // gray for dropped down blocks.
-                setSpritePalette(3, 0xFF000000); // reset to black.
                 // uint32_t block_1     = createBlock(100, 200, 10, 10, 0, 0);
                 // uint32_t sprite_5 = createSprite(100, 200, 10, 60, 1);
 
@@ -271,14 +249,15 @@ int main()
                     last_update = global;
                 }
                 else if (block_created==1) {
-                    if ((global-last_update)>=15) {
+                    if ((global-last_update)>=8) {
                         // TODO: add hit bottom detection.
                         reset_block();
-                        b_pos_y += 1;
+                        b_pos_y = (controller_status & 0x4)? b_pos_y + 2 : b_pos_y + 1;
                         dropBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand, rotate_counter);
                         last_update = global;
                     }
-                    if ((controller_status & 0x1) && pressed == 0) {
+
+                    if ((controller_status & 0x1) && pressed == 0) { // left key
                         pressed = 1;
                         // left
                         if (rand==0) {
@@ -292,7 +271,7 @@ int main()
                             }
                         }
                     }
-                    else if ((controller_status & 0x8) && pressed == 0) {
+                    else if ((controller_status & 0x8) && pressed == 0) { // right key
                         pressed = 1;
                         // right
                         if (rand==0) {
@@ -317,7 +296,7 @@ int main()
                         //     if (b_pos_x < 510-3*block_length) b_pos_x += 1;
                         // dropBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand, rotate_counter);
                     }
-                    else if ((controller_status & 0x2) && pressed == 0) {
+                    else if ((controller_status & 0x2) && pressed == 0) { // up key
                         pressed = 1;
                         // TODO: up (rotate)
                         if (rand==0){
@@ -330,7 +309,7 @@ int main()
                             }
                         }
                     }
-                    else if (controller_status & 0x4) {
+                    else if (controller_status & 0x4) { // down key
                         // TODO: down (hard drop)
                         // put down block to background
                         // reset block_created, b_pos_x, b_pos_y
@@ -342,10 +321,9 @@ int main()
                     
                 }
             }
-
-            else if (controller_status)
+            else if (controller_status) // inside TEXT_MODE
             {
-                VIDEO_MEMORY[x_pos] = ' ';
+                if (VIDEO_MEMORY[x_pos] == 'X') VIDEO_MEMORY[x_pos] = 0;
                 if (controller_status & 0x1)
                 {
                     if (x_pos & 0x3F)
@@ -365,6 +343,7 @@ int main()
                     if (x_pos < 0x8C0)
                     {
                         x_pos += 0x40;
+
                     }
                 }
                 if (controller_status & 0x8)
@@ -374,7 +353,7 @@ int main()
                         x_pos++;
                     }
                 }
-                VIDEO_MEMORY[x_pos] = 'X';
+                if (VIDEO_MEMORY[x_pos] == 0) VIDEO_MEMORY[x_pos] = 'X';
             }
 
             last_global = global;
