@@ -130,12 +130,12 @@ void dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num,
 			}
 		}
 		// set sprite data
-		uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*tmp);
-		for(int i = 0; i < 64; i++){
-			for(int j = 0; j < 64; j++){
-				DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
-			}
-		}
+		// uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*tmp);
+		// for(int i = 0; i < 64; i++){
+		// 	for(int j = 0; j < 64; j++){
+		// 		DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
+		// 	}
+		// }
 
 		// set sprite control
 		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*tmp);

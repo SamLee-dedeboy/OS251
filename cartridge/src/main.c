@@ -29,6 +29,7 @@ int down_block[9][7] = {
     {0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0}
 };
+int pressed = 0;
 
 void line_elimination() {
     int line_sum = 0;
@@ -277,7 +278,8 @@ int main()
                         dropBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand, rotate_counter);
                         last_update = global;
                     }
-                    if (controller_status & 0x1) {
+                    if ((controller_status & 0x1) && pressed == 0) {
+                        pressed = 1;
                         // left
                         if (rand==0) {
                             if (rotate_counter%4==3 && down_block[b_pos_y+2][b_pos_x-1]==1);
@@ -290,7 +292,8 @@ int main()
                             }
                         }
                     }
-                    else if (controller_status & 0x8) {
+                    else if ((controller_status & 0x8) && pressed == 0) {
+                        pressed = 1;
                         // right
                         if (rand==0) {
                             if (rotate_counter%4==0 || rotate_counter%4==2) {
@@ -314,7 +317,8 @@ int main()
                         //     if (b_pos_x < 510-3*block_length) b_pos_x += 1;
                         // dropBlock(b_pos_x*block_length+b_offset_x, b_pos_y*block_length+b_offset_y, block_length, block_length, 0, rand, rotate_counter);
                     }
-                    else if (controller_status & 0x2) {
+                    else if ((controller_status & 0x2) && pressed == 0) {
+                        pressed = 1;
                         // TODO: up (rotate)
                         if (rand==0){
                             if (down_block[b_pos_y+2][b_pos_x]==1 && rotate_counter%4==0);
@@ -332,6 +336,8 @@ int main()
                         // reset block_created, b_pos_x, b_pos_y
                         // check if a line has been filled.
                         
+                    } else {
+                        pressed = 0;
                     }
                     
                 }
