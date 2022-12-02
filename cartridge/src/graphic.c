@@ -19,7 +19,7 @@ uint32_t SystemCall(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t
 // num of sprites: 0~127: small sprite; 128~191: large sprite
 int small_sprite_count = 0; // max: 128 small sprites
 int large_sprite_count = 0; // max: 64 large sprites
-int background_count = 0;
+int down_sprite_count = 0; 
 
 
 void setVideoMode(int mode) {
@@ -70,6 +70,7 @@ uint32_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t col
 		CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
 
 		large_sprite_count++;
+		down_sprite_count++;
 	}
 
 	return num;

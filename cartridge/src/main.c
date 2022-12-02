@@ -181,19 +181,24 @@ int main()
     // newThread = initThread();
 
     // Sprite Memory Data
-    for (int sp_index = 0; sp_index < 128; sp_index++)
-    {
-        volatile char *SM_SPRITE_MEMORY_i = (volatile uint8_t *)(0x500F4000 + sp_index * 0x100);
-        for (int j = 0; j < 256; j++)
-        {
-            SM_SPRITE_MEMORY_i[j] = 255;
-        }
-    }
+    // for (int sp_index = 0; sp_index < 128; sp_index++)
+    // {
+    //     volatile char *SM_SPRITE_MEMORY_i = (volatile uint8_t *)(0x500F4000 + sp_index * 0x100);
+    //     for (int j = 0; j < 256; j++)
+    //     {
+    //         SM_SPRITE_MEMORY_i[j] = 255;
+    //     }
+    // }
 
     int a = 4;
     int b = 12;
     int last_global = 42;
     int x_pos = 12;
+
+    // for (int i=0; i<9; i++) {
+    //     for (int j=0; j<7; j++)
+    //         down_block[i][j] = 0;
+    // }
 
     VIDEO_MEMORY[0] = 'h';
     VIDEO_MEMORY[1] = 'e';
@@ -213,6 +218,7 @@ int main()
     while (1)
     {
         global =  systemcall(SYSTIMER); // Todo: Can not use getTimer()
+        controller_status = getStatus();
         if (global != last_global)
         {
             mode = getMode();
@@ -306,43 +312,40 @@ int main()
                 }
             }
 
-            controller_status = getStatus();
-            if (controller_status)
+            else if (controller_status)
             {
-                if (mode == 0)
+                VIDEO_MEMORY[x_pos] = ' ';
+                if (controller_status & 0x1)
                 {
-                    VIDEO_MEMORY[x_pos] = ' ';
-                    if (controller_status & 0x1)
+                    if (x_pos & 0x3F)
                     {
-                        if (x_pos & 0x3F)
-                        {
-                            x_pos--;
-                        }
+                        x_pos--;
                     }
-                    if (controller_status & 0x2)
-                    {
-                        if (x_pos >= 0x40)
-                        {
-                            x_pos -= 0x40;
-                        }
-                    }
-                    if (controller_status & 0x4)
-                    {
-                        if (x_pos < 0x8C0)
-                        {
-                            x_pos += 0x40;
-                        }
-                    }
-                    if (controller_status & 0x8)
-                    {
-                        if ((x_pos & 0x3F) != 0x3F)
-                        {
-                            x_pos++;
-                        }
-                    }
-                    VIDEO_MEMORY[x_pos] = 'X';
                 }
+                if (controller_status & 0x2)
+                {
+                    if (x_pos >= 0x40)
+                    {
+                        x_pos -= 0x40;
+                    }
+                }
+                if (controller_status & 0x4)
+                {
+                    if (x_pos < 0x8C0)
+                    {
+                        x_pos += 0x40;
+                    }
+                }
+                if (controller_status & 0x8)
+                {
+                    if ((x_pos & 0x3F) != 0x3F)
+                    {
+                        x_pos++;
+                    }
+                }
+                VIDEO_MEMORY[x_pos] = 'X';
             }
+
             last_global = global;
         }
     }

@@ -22,6 +22,9 @@ void changeSpriteColor(uint32_t sprite_num, uint32_t color_num);
 void moveSprite(int sprite_num, int d_x, int d_y);
 uint32_t CalcLargeSpriteControl(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t p);
 uint32_t CalcSmallSpriteControl(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t p);
+uint32_t * createBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id);
+void dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, uint32_t *current_blocks, int rotate_id);
+void clearBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, uint32_t *current_blocks, int rotate_id);
 
 // uint32_t draw_rec(uint32_t x, uint32_t y, uint32_t e_x, uint32_t e_y, uint32_t* RGB);
 // uint32_t moveImage(uint32_t image, uint32_t x, uint32_t y, uint32_t z);
