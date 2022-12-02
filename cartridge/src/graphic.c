@@ -144,7 +144,7 @@ void dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num,
 }
 
 void clearBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, uint32_t *current_blocks, int rotate_id){
-	// large_sprite_count = 0;
+	large_sprite_count = 0;
 	for (int tmp=0; tmp<4; tmp++) {
 		if (block_id==0) {
 			if (rotate_id%4==0) {
