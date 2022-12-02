@@ -228,21 +228,22 @@ void clearBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num
 
 void redraw_dropped(int block_map[9][7], int block_length, int b_offset_x, int b_offset_y, uint32_t color_num) {
 	// reset current dropped
-	for (int i=0; i<down_sprite_count; i++) {
-		// // set dropped sprite data to the back
-		// uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(63-i));
-		// for(int i = 0; i < 64; i++){
-		// 	for(int j = 0; j < 64; j++){
-		// 		DATA[(i<<6) + j] = 0;
-		// 	}
-		// }
+	// for (int i=0; i<down_sprite_count; i++) {
+	// 	// // set dropped sprite data to the back
+	// 	// uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(63-i));
+	// 	// for(int i = 0; i < 64; i++){
+	// 	// 	for(int j = 0; j < 64; j++){
+	// 	// 		DATA[(i<<6) + j] = 0;
+	// 	// 	}
+	// 	// }
 
-		// set dropped sprite control to the back
-		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(63-i));
-		CONTROL[0] = 0;
-	}
+	// 	// set dropped sprite control to the back
+	// 	uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(63-i));
+	// 	CONTROL[0] = 0;
+	// }
 	// redraw
-	down_sprite_count = 0;
+	int one_count = 0;
+	//try re-using the sprites.
 	int32_t x;
 	int32_t y;
 	uint32_t w;
@@ -250,7 +251,7 @@ void redraw_dropped(int block_map[9][7], int block_length, int b_offset_x, int b
 	for (int i=0; i<9; i++) {
 		for (int j=0; j<7; j++)
 			if (block_map[i][j]==1) {
-				down_sprite_count += 1;
+				one_count += 1;
 
 				x = j*block_length + b_offset_x;
 				y = i*block_length + b_offset_y;
@@ -258,18 +259,27 @@ void redraw_dropped(int block_map[9][7], int block_length, int b_offset_x, int b
 				h = block_length;
 
 				// set dropped sprite data to the back
-				uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(64-down_sprite_count));
-				for(int i = 0; i < 64; i++){
-					for(int j = 0; j < 64; j++){
-						DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
-					}
-				}
+				// uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(64-down_sprite_count));
+				// for(int i = 0; i < 64; i++){
+				// 	for(int j = 0; j < 64; j++){
+				// 		DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
+				// 	}
+				// }
 
 				// set dropped sprite control to the back
-				uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(64-down_sprite_count));
-				CONTROL[0] = calcLargeSpriteControl(x, y, w, h, color_num);
+				uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(64-one_count));
+				CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
 			}
+			// else {
+			// 	down_sprite_count -= 1;
+			// }
 	}
+	for (int i=one_count; i<down_sprite_count; i++){
+		// set dropped sprite control to the back
+		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(63-i));
+		CONTROL[0] = 0;
+	}
+	down_sprite_count = one_count;
 }
 
 void drawText(char* text, uint32_t length, int32_t x, int32_t y) {
