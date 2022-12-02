@@ -91,7 +91,7 @@ uint32_t * createBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t co
 	return sprites;
 }
 
-void dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, uint32_t *current_blocks, int rotate_id) {
+void dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, int rotate_id) {
 	for (int tmp=0; tmp<4; tmp++) {
 		if (block_id==0) {
 			if (rotate_id%4==0) {
@@ -143,7 +143,7 @@ void dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num,
 	}
 }
 
-void clearBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, uint32_t *current_blocks, int rotate_id){
+void clearBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, int rotate_id){
 	large_sprite_count = 0;
 	for (int tmp=0; tmp<4; tmp++) {
 		if (block_id==0) {
@@ -193,6 +193,52 @@ void clearBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num
 		// set dropped sprite control to the back
 		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(64-down_sprite_count+tmp));
 		CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
+	}
+}
+
+void redraw_dropped(int block_map[9][7], int block_length, int b_offset_x, int b_offset_y, uint32_t color_num) {
+	// reset current dropped
+	for (int i=0; i<down_sprite_count; i++) {
+		// // set dropped sprite data to the back
+		// uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(63-i));
+		// for(int i = 0; i < 64; i++){
+		// 	for(int j = 0; j < 64; j++){
+		// 		DATA[(i<<6) + j] = 0;
+		// 	}
+		// }
+
+		// set dropped sprite control to the back
+		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(63-i));
+		CONTROL[0] = 0;
+	}
+	// redraw
+	down_sprite_count = 0;
+	int32_t x;
+	int32_t y;
+	uint32_t w;
+	uint32_t h;
+	for (int i=0; i<9; i++) {
+		for (int j=0; j<7; j++)
+			if (block_map[i][j]==1) {
+				down_sprite_count += 1;
+
+				x = j*block_length + b_offset_x;
+				y = i*block_length + b_offset_y;
+				w = block_length;
+				h = block_length;
+
+				// set dropped sprite data to the back
+				uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(64-down_sprite_count));
+				for(int i = 0; i < 64; i++){
+					for(int j = 0; j < 64; j++){
+						DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
+					}
+				}
+
+				// set dropped sprite control to the back
+				uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(64-down_sprite_count));
+				CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
+			}
 	}
 }
 
