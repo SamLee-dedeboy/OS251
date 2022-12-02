@@ -75,6 +75,126 @@ uint32_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t col
 	return num;
 }
 
+uint32_t * createBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id) {
+	uint32_t sprites[4];
+
+	if (block_id == 0) {
+		// A
+		// AAA
+		sprites[0] = createSprite(x, y, w, h, color_num) - 1;
+		sprites[1] = createSprite(x, y+h, w, h, color_num) - 1;
+		sprites[2] = createSprite(x+w, y+h, w, h, color_num) - 1;
+		sprites[3] = createSprite(x+w*2, y+h, w, h, color_num) - 1;
+	}
+
+	return sprites;
+}
+
+void dropBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, uint32_t *current_blocks, int rotate_id) {
+	for (int tmp=0; tmp<4; tmp++) {
+		if (block_id==0) {
+			if (rotate_id%4==0) {
+				//B
+				//BBB
+				if (tmp==1)	y += h;
+				else if (tmp==2) x += w;
+				else if (tmp==3) x += w;
+			}
+			else if (rotate_id%4==1) {
+				//BB
+				//B
+				//B
+				if (tmp==1) y += h;
+				else if (tmp==2) y += h;
+				else if (tmp==3) {
+					x += w;
+					y -= 2*h;
+				}
+			}
+			else if (rotate_id%4==2) {
+				//BBB
+				//  B
+				if (tmp==1) x += w;
+				else if (tmp==2) x += w;
+				else if (tmp==3) y += h;
+			}
+			else if (rotate_id%4==3) {
+				// B
+				// B
+				//BB
+				if (tmp==0) x += w;
+				else if (tmp==1) y += h;
+				else if (tmp==2) y += h;
+				else if (tmp==3) x -= w;
+			}
+		}
+		// set sprite data
+		// uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*tmp);
+		// for(int i = 0; i < 64; i++){
+		// 	for(int j = 0; j < 64; j++){
+		// 		DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
+		// 	}
+		// }
+
+		// set sprite control
+		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*tmp);
+		CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
+	}
+}
+
+void clearBlock(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num, int32_t block_id, uint32_t *current_blocks, int rotate_id){
+	large_sprite_count = 0;
+	for (int tmp=0; tmp<4; tmp++) {
+		if (block_id==0) {
+			if (rotate_id%4==0) {
+				//B
+				//BBB
+				if (tmp==1)	y += h;
+				else if (tmp==2) x += w;
+				else if (tmp==3) x += w;
+			}
+			else if (rotate_id%4==1) {
+				//BB
+				//B
+				//B
+				if (tmp==1) y += h;
+				else if (tmp==2) y += h;
+				else if (tmp==3) {
+					x += w;
+					y -= 2*h;
+				}
+			}
+			else if (rotate_id%4==2) {
+				//BBB
+				//  B
+				if (tmp==1) x += w;
+				else if (tmp==2) x += w;
+				else if (tmp==3) y += h;
+			}
+			else if (rotate_id%4==3) {
+				// B
+				// B
+				//BB
+				if (tmp==0) x += w;
+				else if (tmp==1) y += h;
+				else if (tmp==2) y += h;
+				else if (tmp==3) x -= w;
+			}
+		}
+		// set dropped sprite data to the back
+		uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(64-down_sprite_count+tmp));
+		for(int i = 0; i < 64; i++){
+			for(int j = 0; j < 64; j++){
+				DATA[(i<<6) + j] = (i<h && j<w) ? 0 : 1;
+			}
+		}
+
+		// set dropped sprite control to the back
+		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(64-down_sprite_count+tmp));
+		CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
+	}
+}
+
 void changeSpriteColor(uint32_t sprite_num, uint32_t color_num) {
 	if (sprite_num < 128 ) { // small sprite
 		uint32_t *CONTROL = (volatile uint8_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x100)*sprite_num);
