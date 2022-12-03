@@ -81,7 +81,7 @@ Graphics utility functions are implemented and listed in `graphic.h`
 - multithreading api not merged yet
 
 
-## notes for us: 
+## 🔴 Notes for us: 
 - `spriteDrop()` doesn't need to be implemented as a system call
 - sample usage of multithreading
 - why is `SystemCall()` declared inside `graphic.h`?
