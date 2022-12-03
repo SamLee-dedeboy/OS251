@@ -28,23 +28,22 @@
 #define LARGE_SPRITE_CONTROL_ADDRESS 0x500FF114 // data size: uint32_t
 #define SMALL_SPRITE_CONTROL_ADDRESS 0x500FF214 // data size: uint32_t
 
-volatile uint32_t *VIDEO_MODE = (volatile uint32_t *)(0x500FF414);
 
 uint32_t SystemCall(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5);
 
 void setVideoMode(int mode);
-// uint32_t setBackgroundPalette(uint32_t image, uint32_t palette);
-void setSpritePalette(uint32_t num, uint32_t ARGB);
+void setBackgroundPalette(int32_t paletteNum, int32_t entryNum, uint32_t ARGB);
+void setSpritePalette(int32_t paletteNum, int32_t entryNum, uint32_t ARGB);
 
-uint32_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t color_num);
-void changeSpriteColor(uint32_t sprite_num, uint32_t color_num);
+int16_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t paletteNum, int32_t colorEntry);
+void moveSprite(int16_t sprite_num, uint32_t d_x, uint32_t d_y);
+void changeSpriteColor(int16_t sprite_num, uint32_t color_num);
 uint32_t calcLargeSpriteControl(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t p);
 uint32_t calcSmallSpriteControl(int32_t x, int32_t y, int32_t z, uint32_t w, uint32_t h, uint32_t p);
 
 void drawText(char* text, uint32_t length, int32_t x, int32_t y);
 void clearTextScreen();
 
-// void moveSprite(int sprite_num, int d_x, int d_y);
 // uint32_t moveBackground(uint32_t image, uint32_t x, uint32_t y, uint32_t z);
 // uint32_t backgroundFill(uint32_t background, uint8_t* buff, uint32_t size);
 
