@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "..\\riscv-app"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"stdint.h": "c"
+		}
+	}
+}

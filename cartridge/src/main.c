@@ -2,33 +2,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "api.h"
-#include "Systemcall.h"
+#include "systemcall.h"
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
-TContext MainThread;
-TContext OtherThread;
 
 int mode = 0; // 0 = text mode, 1 = graphics mode
 int test_num = 0;
-uint32_t my_printf(uint32_t funName, char *text, int variable);
 
 uint32_t Thread(void *param)
 {
     while (1)
     {
         test_num++;
-        printtext(WRITE_TEXT, "test_num      %d\n", test_num);
-        printtext(WRITE_TEXT, "global      %d\n", global);
+        global = systemcall(SYSTIMER);
+        printtext(WRITE_TEXT, "thread test_num      %d\n", test_num);
+        printtext(WRITE_TEXT, "thread global      %d\n", global);
     }
 }
 
 int main()
 {
-    thread_init(Thread_INIT, Thread, (void *)0);
+    void *param;
+    thread_init(THREAD_INITIALLIZE, Thread, param);
 
     // Sprite Memory Data
     for (int sp_index = 0; sp_index < 128; sp_index++)
@@ -65,6 +64,7 @@ int main()
         global = systemcall(SYSTIMER);
         if (global != last_global)
         {
+            printtext(WRITE_TEXT, "global      %d\n", global);
             printtext(WRITE_TEXT, "test_num      %d\n", test_num);
             mode = getMode();
             if (mode == 1)

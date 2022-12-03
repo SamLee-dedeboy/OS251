@@ -11,14 +11,21 @@ _start:
     add s0, sp, zero
     jal ra, init
     nop
-    jal zero, main
+    jal ra, main
     .cfi_endproc
-    
+
 
 .section .text, "ax"
-.global systemcall, thread_init, printtext
-systemcall:
-thread_init:
-printtext:
+.global timer, get_controller_status, moveLargeSprite, my_printf, video, moveSmallSprite, thread_initialize, setBG_color
+timer:
+moveLargeSprite:
+get_controller_status:
+my_printf:
+video:
+moveSmallSprite:
+thread_initialize:
+setBG_color:
     ecall
-.end
+    ret
+
+    .end

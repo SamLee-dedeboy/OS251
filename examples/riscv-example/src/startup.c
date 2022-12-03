@@ -41,8 +41,6 @@ typedef int bool;
 #define true 1
 #define false 0
 
-volatile uint32_t *smallspritecontrol = (volatile uint32_t *)(0x500FF214);
-
 volatile LScontrol *LS_control = (volatile LScontrol *)(0x500FF114);
 volatile SScontrol *SS_control = (volatile SScontrol *)(0x500FF214);
 volatile BGcontrol *BG_control = (volatile BGcontrol *)(0x500FF100);
@@ -85,51 +83,40 @@ void init(void)
     volatile uint32_t *palette0 = (volatile uint32_t *)0x500FD000;
     volatile uint32_t *palette1 = (volatile uint32_t *)0x500FD400;
 
+    uint32_t color = 0xff0000ff;
     for (int i = 0; i < 256; i++)
     {
-        palette0[i] = 0xff000000 + i;
-        // palette1[i] = 0xff0000ff - i;
+        *palette0 = color--;
+        palette0 += 1;
+    }
+    color = 0xffff0000;
+    for (int i = 0; i < 256; i++)
+    {
+        *palette1 = color--;
+        palette1 += 1;
     }
 
-    // init small sprite location
-    // 0x 000 1111 1110 000010000 0000010000 00
-    smallspritecontrol[0] = 0x1fc10040;
-
-    // uint32_t color = 0xff0000ff;
-    // for (int i = 0; i < 256; i++)
-    // {
-    //     *palette0 = color--;
-    //     palette0 += 1;
-    // }
-    // color = 0xffff0000;
-
-    // for (int i = 0; i < 256; i++)
-    // {
-    //     *palette1 = color--;
-    //     palette1 += 1;
-    // }
-
-    // LS_control[0].palette = 0;
-    // LS_control[0].offsetX = 64;
-    // LS_control[0].offsetY = 64;
-    // LS_control[0].width = 15;
-    // LS_control[0].hight = 15;
-    // LS_control[1].palette = 1;
-    // LS_control[1].offsetX = 64;
-    // LS_control[1].offsetY = 64;
-    // LS_control[1].width = 5;
-    // LS_control[1].hight = 5;
-    // SS_control[0].palette = 0;
-    // SS_control[0].offsetX = 512;
-    // SS_control[0].offsetY = 200;
-    // SS_control[0].width = 10;
-    // SS_control[0].hight = 10;
-    // SS_control[0].z = 5;
-    // BG_control[0].palette = 0;
-    // BG_control[0].offsetX = 512;
-    // BG_control[0].offsetY = 288;
-    // BG_control[0].z = 0;
-    // // palette initialized end
+    LS_control[0].palette = 0;
+    LS_control[0].offsetX = 64;
+    LS_control[0].offsetY = 64;
+    LS_control[0].width = 15;
+    LS_control[0].hight = 15;
+    LS_control[1].palette = 1;
+    LS_control[1].offsetX = 64;
+    LS_control[1].offsetY = 64;
+    LS_control[1].width = 5;
+    LS_control[1].hight = 5;
+    SS_control[0].palette = 0;
+    SS_control[0].offsetX = 512;
+    SS_control[0].offsetY = 200;
+    SS_control[0].width = 10;
+    SS_control[0].hight = 10;
+    SS_control[0].z = 5;
+    BG_control[0].palette = 0;
+    BG_control[0].offsetX = 512;
+    BG_control[0].offsetY = 288;
+    BG_control[0].z = 0;
+    // palette initialized end
 }
 
 volatile int global = 0;
@@ -275,20 +262,6 @@ uint32_t c_syscall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t p
         break;
     case SET_BG_COLOR:
         setBGcolor(param2);
-        break;
-    case MODE_STATUS:
-        if (MODE_CONTROL & 1)
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-        break;
-    case SMALL_SPRITE_DROP:
-        smallspritecontrol[0] += 0x00001000;
-        return 1;
         break;
     default:
         break;

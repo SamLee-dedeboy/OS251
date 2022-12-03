@@ -15,12 +15,10 @@
 #define MTIMECMP_HIGH (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 
-typedef uint32_t *TContext;
-typedef uint32_t (*TEntry)(void *param);
-
+uint32_t my_printf(uint32_t funName, char *text, int variable);
 uint32_t printtext(uint32_t funName, char *text, int variable);
-TContext thread_init(uint32_t funName, TEntry entry, void *param);
-void SwitchContext(uint32_t funName, TContext *old, TContext new);
+typedef uint32_t (*TContextEntry)(void *param);
+uint32_t thread_init(uint32_t funName, TContextEntry entry, void *param);
 uint32_t systemcall(uint32_t funName);
 
 uint32_t getTimer();

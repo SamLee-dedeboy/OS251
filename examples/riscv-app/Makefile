@@ -24,19 +24,17 @@ else
 CFLAGS   += -O3
 endif
 
-LDFILE   = riscv32-console.ld
+LDFILE   = riscv32-app.ld
 INCLUDE  += -I $(INC_DIR)
-CFLAGS   += -ffreestanding  -nostartfiles -nostdlib -nodefaultlibs
+CFLAGS   += -ffreestanding  -nostartfiles
 LDFLAGS  +=
 LDFLAGS  += -Wl,--gc-sections -Wl,-T,$(LDFILE)
 
-TARGET_NAME = riscv-console-cartridge
+TARGET_NAME = riscv-console-app
 
 TARGET_OBJS =   $(OBJ_DIR)/main.o               \
-				$(OBJ_DIR)/crt0.o               \
-				$(OBJ_DIR)/api.o                \
-				$(OBJ_DIR)/graphic.o                \
-				$(OBJ_DIR)/startup.o
+                $(OBJ_DIR)/crt0.o               \
+                $(OBJ_DIR)/startup.o
 
 all: directories $(BIN_DIR)/$(TARGET_NAME)
 
@@ -44,11 +42,9 @@ $(BIN_DIR)/$(TARGET_NAME): $(TARGET_OBJS)
 	$(CC) $(TARGET_OBJS) -o $(BIN_DIR)/$(TARGET_NAME) $(CFLAGS) $(DEFINES) $(LDFLAGS) 
 	$(STRIP) $(BIN_DIR)/$(TARGET_NAME) -o $(BIN_DIR)/$(TARGET_NAME).strip
 
-# Build all assembly files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s
 	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
 
-# Build all C files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
 	
