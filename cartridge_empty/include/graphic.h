@@ -28,24 +28,27 @@
 
 uint32_t SystemCall(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5);
 
+// Video Controls
 int setVideoMode(int mode);
 void setRefreshRate(uint8_t rate);
 
-int setBackgroundPalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB);
-int setSpritePalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB);
+// Backgrounds
+int setBackgroundPalette(uint8_t palette_num, uint32_t entry_num, uint32_t ARGB);
+int backgroundDrawRec(uint8_t background_num, int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t colorEntry);
+int setBackgroundControl(uint8_t background_num, int32_t x, int32_t y, int32_t z, uint8_t palette_num);
+int changeBackgroundPalette(uint8_t background_num, uint8_t palette_num);
 
-int16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t palette_num, uint8_t colorEntry);
-void moveSprite(int16_t sprite_num, uint32_t d_x, uint32_t d_y);
-void changeSpritePalette(int16_t sprite_num, int32_t palette_num);
-uint32_t calcLargeSpriteControl(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t p);
-uint32_t calcSmallSpriteControl(int32_t x, int32_t y, int32_t z, uint32_t w, uint32_t h, uint32_t p);
+// Sprites
+int setSpritePalette(uint8_t palette_num, uint32_t entry_num, uint32_t ARGB);
+uint16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t palette_num, uint8_t colorEntry);
+int moveSprite(uint16_t sprite_num, uint32_t d_x, uint32_t d_y);
+int changeSpritePalette(uint16_t sprite_num, uint8_t palette_num);
+uint32_t calcSmallSpriteControl(int32_t x, int32_t y, int32_t z, uint32_t w, uint32_t h, uint8_t p);
+uint32_t calcLargeSpriteControl(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t p);
 
-void drawText(char* text, uint32_t length, int32_t x, int32_t y);
+// Texts
+int drawText(char* text, uint32_t length, int32_t x, int32_t y);
 void clearTextScreen();
-
-void backgroundDrawRec(int8_t backgroundNum, int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t colorEntry);
-void setBackgroundControl(int8_t backgroundNum, int32_t x, int32_t y, int32_t z, int32_t palette_num);
-void changebackgroundPalette(int16_t sprite_num, int32_t palette_num);
 
 
 #endif
