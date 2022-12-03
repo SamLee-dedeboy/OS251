@@ -41,6 +41,12 @@ int main()
             }
             else if (mode == GRAPHICS_MODE) {
                 // do something
+                if(controller_status) {
+                    if (controller_status & 0x8) // right
+                    {
+                        moveSprite(sprite_1, 1, 0);
+                    }
+                }
             }
             last_global = global;
         }
