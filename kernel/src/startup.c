@@ -102,12 +102,16 @@ void thread_timer_scheduel()
     MTIMECMP_HIGH = NewCompare >> 32;
     MTIMECMP_LOW = NewCompare;
     global++;
-    if (global % 500 == 0 && current_thread_num > 1)
+    if (global % 20 == 0 && current_thread_num >= 2)
     {
         uint32_t mepc = csr_mepc_read();
         TContextState PrevState = CPUHALSuspendInterrupts();
-        ContextSwitch(&ThreadPointers[running_thread_pointer], ThreadPointers[(running_thread_pointer + 1) % current_thread_num]);
-        running_thread_pointer++;
+        int t1, t2;
+        t1 = running_thread_pointer;
+        t2 = (running_thread_pointer + 1) % current_thread_num;
+        running_thread_pointer = t2;
+        ContextSwitch(&ThreadPointers[t1], ThreadPointers[t2]);
+
         csr_write_mepc(mepc);
         CPUHALResumeInterrupts(PrevState);
     }
@@ -163,12 +167,11 @@ uint32_t c_syscall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t p
         break;
     case Thread_INIT:
         uint32_t ThreadStack[128];
-        if (current_thread_num <= MAX_THREAD_NUM - 1)
+        if (current_thread_num <= MAX_THREAD_NUM)
         {
-            ThreadPointers[current_thread_num++] = ContextInitialize((TContext)(ThreadStack + 128), (TContextEntry)param2, (void *)param3);
+            ThreadPointers[current_thread_num] = ContextInitialize((TContext)(ThreadStack + 128), (TContextEntry)param2, (void *)param3);
+            current_thread_num++;
         }
-        printf((char *)current_thread_num, (int)current_thread_num);
-        fflush(stdout);
         break;
     default:
         break;

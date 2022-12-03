@@ -13,16 +13,16 @@ TContext MainThread;
 TContext OtherThread;
 
 int mode = 0; // 0 = text mode, 1 = graphics mode
+int test_num = 0;
 uint32_t my_printf(uint32_t funName, char *text, int variable);
 
 uint32_t Thread(void *param)
 {
     while (1)
     {
-        global = systemcall(SYSTIMER);
-        printtext(WRITE_TEXT, "Thread:      %d\n", global);
-        // my_printf(WRITE_TEXT, "Thread: %d\r", global);
-        // fflush(stdout);
+        test_num++;
+        printtext(WRITE_TEXT, "test_num      %d\n", test_num);
+        printtext(WRITE_TEXT, "global      %d\n", global);
     }
 }
 
@@ -60,13 +60,12 @@ int main()
     VIDEO_MEMORY[12] = 'X';
     (*INT_ENABLE_REG) = 0x7;
 
-    printtext(WRITE_TEXT, "value_malloc：      %d\n", global);
-
     while (1)
     {
-        global = systemcall(SYSTIMER); // Todo: Can not use getTimer()
+        global = systemcall(SYSTIMER);
         if (global != last_global)
         {
+            printtext(WRITE_TEXT, "test_num      %d\n", test_num);
             mode = getMode();
             if (mode == 1)
             {
