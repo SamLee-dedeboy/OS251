@@ -1,34 +1,41 @@
 #include "graphic.h"
 
 
-// num of sprites: 0~127: small sprite; 128~191: large sprite
+// Nuber of sprites: 0~127: small sprite; 128~191: large sprite
 int small_sprite_count = 0; // max: 128 small sprites
 int large_sprite_count = 0; // max: 64 large sprites
 int down_sprite_count = 0; 
 
-volatile uint32_t *VIDEO_MODE = (volatile uint32_t *)(0x500FF414);
 
 void setVideoMode(int mode) {
-	*VIDEO_MODE = mode;
+	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
+	VIDEO_MODE[0] &= ~(0x1);
+	VIDEO_MODE[0] |= mode;
 	return;
 }
 
+void setRefreshRate(uint8_t rate) {
+	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
+	VIDEO_MODE[0] &= ~(0xFE);
+	VIDEO_MODE[0] |= (rate<<1);
+}
 
-void setBackgroundPalette(int32_t paletteNum, int32_t entryNum, uint32_t ARGB) {
-	uint32_t *PALETTE = (volatile uint32_t *)(BACKGROUND_PALLETE_ADDRESS + (0x400)*paletteNum + (0x4)*entryNum);
+
+void setBackgroundPalette(int32_t palette_num, int32_t entry_num, uint32_t ARGB) {
+	uint32_t *PALETTE = (volatile uint32_t *)(BACKGROUND_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
 	PALETTE[0] = ARGB;
 	return;
 }
 
 
-void setSpritePalette(int32_t paletteNum, int32_t entryNum, uint32_t ARGB) {
-	uint32_t *PALETTE = (volatile uint32_t *)(SPRITE_PALLETE_ADDRESS + (0x400)*paletteNum + (0x4)*entryNum);
+void setSpritePalette(int32_t palette_num, int32_t entry_num, uint32_t ARGB) {
+	uint32_t *PALETTE = (volatile uint32_t *)(SPRITE_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
 	PALETTE[0] = ARGB;
 	return;
 }
 
 
-int16_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t paletteNum, int32_t colorEntry) {
+int16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t palette_num, int8_t colorEntry) {
 	int16_t num;
 	if(w < 16 && h < 16 ) { // create small sprite
 		if(small_sprite_count >= 128) small_sprite_count = 0;
@@ -44,7 +51,7 @@ int16_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t palet
 
 		// set sprite control
 		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*small_sprite_count);
-		CONTROL[0] = calcSmallSpriteControl(x, y, 0, w, h, paletteNum);
+		CONTROL[0] = calcSmallSpriteControl(x, y, 0, w, h, palette_num);
 
 		small_sprite_count++;
 	}
@@ -62,7 +69,7 @@ int16_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t palet
 
 		// set sprite control
 		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*large_sprite_count);
-		CONTROL[0] = calcLargeSpriteControl(x, y, w, h, paletteNum);
+		CONTROL[0] = calcLargeSpriteControl(x, y, w, h, palette_num);
 
 		large_sprite_count++;
 		down_sprite_count++;
@@ -83,7 +90,7 @@ void moveSprite(int16_t sprite_num, uint32_t d_x, uint32_t d_y) {
 		x += d_x;
 		y += d_y;
 
-		CONTROL[0] &= ~(0X1FFFFC);
+		CONTROL[0] &= ~(0X1FFFFC); // clear out original x, y bits
 		CONTROL[0] |= (x<<2);
 		CONTROL[0] |= (y<<12);
 	}
@@ -103,17 +110,17 @@ void moveSprite(int16_t sprite_num, uint32_t d_x, uint32_t d_y) {
 }
 
 
-void changeSpriteColor(int16_t sprite_num, uint32_t color_num) {
+void changeSpritePalette(int16_t sprite_num, int32_t palette_num) {
 	if (sprite_num < 128 ) { // small sprite
 		uint32_t *CONTROL = (volatile uint8_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x100)*sprite_num);
 		CONTROL[0] &= 0xFFFFFFFC;
-		CONTROL[0] |= color_num;
+		CONTROL[0] |= palette_num;
 	}
 	else { // large sprite
 		uint32_t num = sprite_num - 128;
 		uint32_t *CONTROL = (volatile uint8_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x100)*num);
 		CONTROL[0] &= 0xFFFFFFFC;
-		CONTROL[0] |= color_num;
+		CONTROL[0] |= palette_num;
 	}
 }
 
@@ -150,5 +157,30 @@ void clearTextScreen() {
 		TEXT_DATA[i] = 0;
 	}
 
+	return;
+}
+
+
+void backgroundDrawRec(int8_t backgroundNum, 
+						int32_t x, int32_t y, 
+						uint32_t w, uint32_t h,
+						int8_t colorEntry) {
+	
+	// set background data
+	uint8_t *DATA = (volatile uint8_t *)(BACKGROUND_DATA_ADDRESS + (0x24000)*backgroundNum);
+	for(int i = 0; i < h; i++){
+		for(int j = 0; j < w; j++){
+			DATA[(0x200)*(y+i) + (x+j)] = colorEntry;
+		}
+	}
+
+	return;
+}
+
+void setBackgroundControl(int8_t backgroundNum, int32_t x, int32_t y, int32_t z, int32_t palette_num) {
+	// set background control
+	uint32_t *CONTROL = (volatile uint32_t *)(BACKGROUND_CONTROL_ADDRESS + (0x4)*backgroundNum);
+	CONTROL[0] = ((z)<<22) | ((y+288)<<12) | ((x+512)<<2) | palette_num;
+	
 	return;
 }

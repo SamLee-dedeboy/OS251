@@ -15,38 +15,37 @@
 #define TEXT_MODE                    0
 #define GRAPHICS_MODE                1
 
-#define BACKGROUND_DATA_ADDRESS 0x50000000 // data size: uint8_t
-#define LARGE_SPRITE_DATA_ADDRESS 0x500B4000 // data size: uint8_t
-#define SMALL_SPRITE_DATA_ADDRESS 0x500F4000 // data size: uint8_t
-
-#define BACKGROUND_PALLETE_ADDRESS 0x500FC000 // uint32_t
-#define SPRITE_PALLETE_ADDRESS 0x500FD000 // uint32_t
-
-#define TEXT_DATA_ADDRESS 0x500FE800 // data size: char
-
-#define BACKGROUND_CONTROL_ADDRESS 0x500FF100 // data size: uint32_t
+#define BACKGROUND_DATA_ADDRESS 0x50000000      // data size: uint8_t
+#define LARGE_SPRITE_DATA_ADDRESS 0x500B4000    // data size: uint8_t
+#define SMALL_SPRITE_DATA_ADDRESS 0x500F4000    // data size: uint8_t
+#define BACKGROUND_PALLETE_ADDRESS 0x500FC000   // data size: uint32_t
+#define SPRITE_PALLETE_ADDRESS 0x500FD000       // data size: uint32_t
+#define TEXT_DATA_ADDRESS 0x500FE800            // data size: char
+#define BACKGROUND_CONTROL_ADDRESS 0x500FF100   // data size: uint32_t
 #define LARGE_SPRITE_CONTROL_ADDRESS 0x500FF114 // data size: uint32_t
 #define SMALL_SPRITE_CONTROL_ADDRESS 0x500FF214 // data size: uint32_t
-
+#define MODE_CONTROL_REGISTER 0x500FF414
 
 uint32_t SystemCall(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5);
 
 void setVideoMode(int mode);
-void setBackgroundPalette(int32_t paletteNum, int32_t entryNum, uint32_t ARGB);
-void setSpritePalette(int32_t paletteNum, int32_t entryNum, uint32_t ARGB);
+void setRefreshRate(uint8_t rate);
 
-int16_t createSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t paletteNum, int32_t colorEntry);
+void setBackgroundPalette(int32_t palette_num, int32_t entry_num, uint32_t ARGB);
+void setSpritePalette(int32_t palette_num, int32_t entry_num, uint32_t ARGB);
+
+int16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t palette_num, int8_t colorEntry);
 void moveSprite(int16_t sprite_num, uint32_t d_x, uint32_t d_y);
-void changeSpriteColor(int16_t sprite_num, uint32_t color_num);
+void changeSpritePalette(int16_t sprite_num, int32_t palette_num);
 uint32_t calcLargeSpriteControl(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t p);
 uint32_t calcSmallSpriteControl(int32_t x, int32_t y, int32_t z, uint32_t w, uint32_t h, uint32_t p);
 
 void drawText(char* text, uint32_t length, int32_t x, int32_t y);
 void clearTextScreen();
 
-// uint32_t moveBackground(uint32_t image, uint32_t x, uint32_t y, uint32_t z);
-// uint32_t backgroundFill(uint32_t background, uint8_t* buff, uint32_t size);
+void backgroundDrawRec(int8_t backgroundNum, int32_t x, int32_t y, uint32_t w, uint32_t h, int8_t colorEntry);
+void setBackgroundControl(int8_t backgroundNum, int32_t x, int32_t y, int32_t z, int32_t palette_num);
+void changebackgroundPalette(int16_t sprite_num, int32_t palette_num);
 
-// uint32_t setRefreshRate(uint32_t rate);
 
 #endif

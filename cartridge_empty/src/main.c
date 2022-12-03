@@ -16,15 +16,22 @@ int main()
     drawText(greeting, 6, 0, 0);
 
     // draw sprite
-    setSpritePalette(0, 0xFFFF0000); // Red
-    setSpritePalette(1, 0xFF0000FF); // Blue
-    uint32_t sprite_1 = createSprite(0, 0, 40, 20, 0);
-    uint32_t sprite_2 = createSprite(0, 20, 20, 40, 1);
+    setSpritePalette(0, 0, 0x00000000); // Transparent
+    setSpritePalette(0, 1, 0xFFFF0000); // Red
+    setSpritePalette(0, 2, 0xFF0000FF); // Blue
+    int32_t sprite_1 = createRecSprite(0, 0, 40, 20, 0, 1);
+    int32_t sprite_2 = createRecSprite(0, 20, 20, 40, 0, 2);
+
+    setBackgroundPalette(0, 0, 0x00000000); // Transparent
+    setBackgroundPalette(0, 1, 0xFFFFFF00); // Yellow
+    backgroundDrawRec(0, FULL_X/2, FULL_Y/2, 50, 50, 1);
+    setBackgroundControl(0, 0, 0, 0, 0);
+    setVideoMode(GRAPHICS_MODE);
 
     while (1)
     {
         global =  getTimer();
-
+        controller_status = getStatus();
         if(global != last_global) {
 
             mode = getMode();
