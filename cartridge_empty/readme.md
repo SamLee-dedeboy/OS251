@@ -86,4 +86,5 @@ Graphics utility functions are implemented and listed in `graphic.h`
 - sample usage of multithreading
 - why is `SystemCall()` declared inside `graphic.h`?
 - what is the difference between `getTicks` and `getTimer`?
+- how to change refresh rate?
 - update API documentation
