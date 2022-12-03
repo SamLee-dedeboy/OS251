@@ -7,11 +7,13 @@ int large_sprite_count = 0; // max: 64 large sprites
 int down_sprite_count = 0; 
 
 
-void setVideoMode(int mode) {
+int setVideoMode(int mode) {
+	if(!(mode == 0 || mode == 1)) return -1;
+
 	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
 	VIDEO_MODE[0] &= ~(0x1);
 	VIDEO_MODE[0] |= mode;
-	return;
+	return 1;
 }
 
 void setRefreshRate(uint8_t rate) {
@@ -21,21 +23,25 @@ void setRefreshRate(uint8_t rate) {
 }
 
 
-void setBackgroundPalette(int32_t palette_num, int32_t entry_num, uint32_t ARGB) {
+int setBackgroundPalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB) {
+	if(!(palette_num > 3 || entry_num > 255)) return -1;
+
 	uint32_t *PALETTE = (volatile uint32_t *)(BACKGROUND_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
 	PALETTE[0] = ARGB;
-	return;
+	return 1;
 }
 
 
-void setSpritePalette(int32_t palette_num, int32_t entry_num, uint32_t ARGB) {
+int setSpritePalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB) {
+	if(!(palette_num > 3 || entry_num > 255)) return -1;
+
 	uint32_t *PALETTE = (volatile uint32_t *)(SPRITE_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
 	PALETTE[0] = ARGB;
-	return;
+	return 1;
 }
 
 
-int16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t palette_num, int8_t colorEntry) {
+int16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t palette_num, uint8_t colorEntry) {
 	int16_t num;
 	if(w < 16 && h < 16 ) { // create small sprite
 		if(small_sprite_count >= 128) small_sprite_count = 0;
@@ -164,7 +170,7 @@ void clearTextScreen() {
 void backgroundDrawRec(int8_t backgroundNum, 
 						int32_t x, int32_t y, 
 						uint32_t w, uint32_t h,
-						int8_t colorEntry) {
+						uint8_t colorEntry) {
 	
 	// set background data
 	uint8_t *DATA = (volatile uint8_t *)(BACKGROUND_DATA_ADDRESS + (0x24000)*backgroundNum);
