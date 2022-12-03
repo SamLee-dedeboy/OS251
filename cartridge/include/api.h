@@ -15,7 +15,6 @@
 #define MTIMECMP_HIGH (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 
-uint32_t my_printf(uint32_t funName, char *text, int variable);
 uint32_t printtext(uint32_t funName, char *text, int variable);
 typedef uint32_t (*TContextEntry)(void *param);
 uint32_t thread_init(uint32_t funName, TContextEntry entry, void *param);
