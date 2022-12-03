@@ -13,12 +13,12 @@ graphics utility functions are implemented and listed in `graphic.h`
 
  - `int setBackgroundPalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB)`
  Sets color of the specified entry of the specified background palette.
- palette_num can be only 0~3. entry_num can be only 0~255.
+ palette_num can be only 0 to 3. entry_num can be only 0 to 255.
  On success will return 1, upon failure will return -1.
 
  - `int setSpritePalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB)`
  Sets color of the specified entry of the specified sprite palette.
- palette_num can be only 0~3. entry_num can be only 0~255.
+ palette_num can be only 0 to 3. entry_num can be only 0 to 255.
  On success will return 1, upon failure will return -1.
 
  - `int16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t palette_num, uint8_t colorEntry)`
@@ -28,8 +28,8 @@ graphics utility functions are implemented and listed in `graphic.h`
  If total number of large sprites exeed 64, then will overwrite the first large sprite;
  Color(entry_num) outside specified width and height will be set to 0. So we recommend setting the 0 entry of the palette to transparent for desired rectangle.
  
- Returns a unique sprite index. Numbers 0~127 are small sprites, 128~191 are large sprites.
- 
+ Returns a unique sprite index. Numbers 0 to 127 are small sprites, 128 to 191 are large sprites.
+
  - `void moveSprite(int16_t sprite_num, uint32_t d_x, uint32_t d_y)`
  - `void changeSpritePalette(int16_t sprite_num, int32_t palette_num)`
  - `uint32_t calcLargeSpriteControl(int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t p)`
