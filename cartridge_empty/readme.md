@@ -1,4 +1,4 @@
-Sample usage of our API are demonstrated inside `main.c`
+Sample usage of our API is demonstrated inside `main.c`
 ## Graphics APIs
 Graphics utility functions are implemented and listed in `graphic.h`
 
@@ -41,8 +41,8 @@ Graphics utility functions are implemented and listed in `graphic.h`
  - `uint16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t palette_num, uint8_t colorEntry)`
     - Creates a rectangular sprite of specified width and height at the desired position.
     - If the input width and height are both smaller than 16, then a small sprite will be created; otherwise creats a larges sprite.
-    - If total number of small sprites exeed 128, then will overwrite the first small sprite;
-    - If total number of large sprites exeed 64, then will overwrite the first large sprite;
+    - If total number of small sprites exeed 128, then the first small sprite will be overwritten.
+    - If total number of large sprites exeed 64, then the first large sprite will be overwritten.
     - Color(entry_num) outside specified width and height will be set to 0. So we recommend setting the 0 entry of the palette to transparent for desired rectangle.
     - Returns a unique sprite index. Numbers 0 to 127 are small sprites, 128 to 191 are large sprites.
 
