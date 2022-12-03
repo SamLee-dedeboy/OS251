@@ -1,7 +1,7 @@
 Sample usage of our API are demonstrated inside `main.c`
 ## Graphics utility functions are implemented and listed in `graphic.h`
-- Bug when using `setRefreshRate()`: sprites cannot move if th refresh rarte is other than default 0.
 - `createRecSprite()`: sets the color(entry_num) outside of specified width and height to 0. So we recommend setting the 0 entry of the palette to transparent for desired rectangle.
+- Bug when using `setRefreshRate()`: sprites cannot move if the refresh rate is set to values other than default 0.
 
 ## System call APIs
 - `getTicks`
