@@ -1,33 +1,33 @@
 Sample usage of our API are demonstrated inside `main.c`
 ## Graphics APIs
-graphics utility functions are implemented and listed in `graphic.h`
+Graphics utility functions are implemented and listed in `graphic.h`
 
 ### Video controls
  - `int setVideoMode(int mode)`
-    - Changes the mode of video controller. 0 = TEXT_MODE 1 = GRAPHICS_MODE.
+    - Changes the mode of video controller. 0 = TEXT_MODE; 1 = GRAPHICS_MODE.
     - On success will return 1, upon failure will return -1.
 
  - `void setRefreshRate(uint8_t rate)`
     - Changes the refresh rate of the screen.
-    - A bug appears when setting the refrsh value to oher than default 0, cannot move sprites.
+    - ⚠️A bug appears when setting the refrsh value to oher than default 0, cannot move sprites⚠️
 
 ### Backgrounds
  - `int setBackgroundPalette(uint8_t palette_num, uint32_t entry_num, uint32_t ARGB)`
     - Sets color of the specified entry of the specified background palette. 
-    - palette_num can be only 0 to 3. entry_num can be only 0 to 255.
+    - `palette_num` can be only 0 to 3. `entry_num` can be only 0 to 255.
     - On success will return 1, upon failure will return -1.
 
  - `int backgroundDrawRec(uint8_t background_num, int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t colorEntry)`
     - Draw rectangles onto specified background_num.
-    - call `setBackgroundControl()` upon first time drawing on this background_num.
+    - Call `setBackgroundControl()` upon first time drawing on this background_num.
     - On success will return 1, upon failure will return -1.
 
  - `int setBackgroundControl(uint8_t background_num, int32_t x, int32_t y, int32_t z, uint8_t palette_num)`
-    - set the control value of specified background_num.
+    - Sets the control value of specified background_num.
     - On success will return 1, upon failure will return -1.
 
  - `int changeBackgroundPalette(uint8_t background_num, uint8_t palette_num)`
-    - Change the palette number of specified background.
+    - Changes the palette number of specified background.
     - `background_num` should be 0 to 3.
     - `palette_num` should be 0 to 3.
     - On success will return 1, upon failure will return -1.
@@ -52,7 +52,7 @@ graphics utility functions are implemented and listed in `graphic.h`
     - On success will return 1, upon failure will return -1.
 
  - `int changeSpritePalette(uint16_t sprite_num, uint8_t palette_num)`
-    - Change the palette number of specified sprite.
+    - Changes the palette number of specified sprite.
     - `sprite_num` should be the unique sprite index.
     - `palette_num` should be 0 to 3.
     - On success will return 1, upon failure will return -1.
@@ -66,7 +66,7 @@ graphics utility functions are implemented and listed in `graphic.h`
 ### Texts
  - `int drawText(char* text, uint32_t length, int32_t x, int32_t y)`
     - Draws text at specified position.
-    - `x` range: 0 to 63; `y` range: 0 to 35
+    - x range: 0 to 63; y range: 0 to 35
     - On success will return 1, upon failure will return -1.
 
  - `void clearTextScreen()`
