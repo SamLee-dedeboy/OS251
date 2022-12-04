@@ -24,7 +24,7 @@ void setRefreshRate(uint8_t rate) {
 
 
 int setBackgroundPalette(uint8_t palette_num, uint32_t entry_num, uint32_t ARGB) {
-	if(!(palette_num > 3 || entry_num > 255)) return -1;
+	if((palette_num > 3 || entry_num > 255)) return -1;
 
 	uint32_t *PALETTE = (volatile uint32_t *)(BACKGROUND_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
 	PALETTE[0] = ARGB;
@@ -75,7 +75,7 @@ int changeBackgroundPalette(uint8_t background_num, uint8_t palette_num) {
 
 
 int setSpritePalette(uint8_t palette_num, uint32_t entry_num, uint32_t ARGB) {
-	if(!(palette_num > 3 || entry_num > 255)) return -1;
+	if(palette_num > 3 || entry_num > 255) return -1;
 
 	uint32_t *PALETTE = (volatile uint32_t *)(SPRITE_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
 	PALETTE[0] = ARGB;
