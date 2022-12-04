@@ -48,6 +48,8 @@ __attribute__((always_inline)) inline void csr_disable_interrupts(void)
 #define MTIMECMP_HIGH (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 #define MODE_CONTROL_REG (*((volatile uint32_t *)0x500FF414))
+#define MACHINE_TIME_REGISTER (*((volatile uint32_t *)0x40000008))
+#define MACHINE_PERIOD_REGISTER (*((volatile uint32_t *)0x40000044))
 
 volatile uint32_t *smallspritecontrol = (volatile uint32_t *)(0x500FF214);
 
@@ -97,6 +99,15 @@ volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
 int color = 1;
 int color_counter = 0;
 
+static unsigned int seed = 1;
+void srand (uint32_t newseed) {
+    seed = (unsigned)newseed & 0x7fffffffU;
+}
+uint32_t rand (void) {
+    seed = (seed * 1103515245U + 12345U) & 0x7fffffffU;
+    return (uint32_t)seed;
+}
+
 void c_interrupt_handler(uint32_t mcause)
 {
     uint64_t NewCompare = (((uint64_t)MTIMECMP_HIGH) << 32) | MTIMECMP_LOW;
@@ -143,7 +154,21 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     case SMALL_SPRITE_DROP:
         smallspritecontrol[0] += 0x00001000;
         return 1;
+
+    case READ_MACHINE_TIME:
+        return MACHINE_TIME_REGISTER;
+
+    case READ_MACHINE_PERIOD:
+        return MACHINE_PERIOD_REGISTER;
+
+    case READ_INT_PENDING_REG:
+        return INT_PENDING_REG;
+    
+    case RAND:
+        srand(MACHINE_TIME_REGISTER);
+        return rand();
     }
+
     // Thread
     if (call == 3)
     {

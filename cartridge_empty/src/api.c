@@ -19,3 +19,20 @@ uint32_t spriteDrop()
 {
     return systemcall(SMALL_SPRITE_DROP);
 }
+
+uint32_t getMachineTime()
+{
+    return systemcall(READ_MACHINE_TIME);
+}
+uint32_t getMachinePeriod()
+{
+    return systemcall(READ_MACHINE_PERIOD);
+}
+uint32_t getIntPendingReg() 
+{
+    return systemcall(READ_INT_PENDING);
+}
+uint32_t rand()
+{
+    return systemcall(RAND);
+}
