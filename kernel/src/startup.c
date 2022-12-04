@@ -95,42 +95,6 @@ void init(void)
     // init small sprite location
     // 0x 000 1111 1110 000010000 0000010000 00
     smallspritecontrol[0] = 0x1fc10040;
-
-    // uint32_t color = 0xff0000ff;
-    // for (int i = 0; i < 256; i++)
-    // {
-    //     *palette0 = color--;
-    //     palette0 += 1;
-    // }
-    // color = 0xffff0000;
-
-    // for (int i = 0; i < 256; i++)
-    // {
-    //     *palette1 = color--;
-    //     palette1 += 1;
-    // }
-
-    // LS_control[0].palette = 0;
-    // LS_control[0].offsetX = 64;
-    // LS_control[0].offsetY = 64;
-    // LS_control[0].width = 15;
-    // LS_control[0].hight = 15;
-    // LS_control[1].palette = 1;
-    // LS_control[1].offsetX = 64;
-    // LS_control[1].offsetY = 64;
-    // LS_control[1].width = 5;
-    // LS_control[1].hight = 5;
-    // SS_control[0].palette = 0;
-    // SS_control[0].offsetX = 512;
-    // SS_control[0].offsetY = 200;
-    // SS_control[0].width = 10;
-    // SS_control[0].hight = 10;
-    // SS_control[0].z = 5;
-    // BG_control[0].palette = 0;
-    // BG_control[0].offsetX = 512;
-    // BG_control[0].offsetY = 288;
-    // BG_control[0].z = 0;
-    // // palette initialized end
 }
 
 volatile int global = 0;
@@ -182,7 +146,7 @@ void timer_interrupt()
     MTIMECMP_HIGH = NewCompare >> 32;
     MTIMECMP_LOW = NewCompare;
     global++;
-    if (global % 50 == 0 && current_thread_num >= 2)
+    if (global % 10 >= (10 - running_thread_pointer - 1) && current_thread_num >= 2)
     {
         uint32_t mepc = csr_mepc_read();
         printf("\n");
