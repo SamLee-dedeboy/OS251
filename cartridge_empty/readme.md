@@ -77,4 +77,11 @@ Graphics utility functions are implemented and listed in `graphic.h`
 - `getTimer`: returns a value that is increased upon every iterrupt. Value rounds back to 0 when it reaches 999.
 - `getMode`: get current video mode
 - `getStatus`: get controller status
+- `*getMachinePeriod`: reads `Machine Clock Period Register`.
+- `*getMachineTime`: reads `Machine Time (mtime)`.
+- `*getIntPendingReg`: reads `Interrupt Pending Flag`.
+- `*rand()`: generates random numbers.
 - multithreading api not merged yet
+
+Note: the `*` apis are not tested yet. Prepare to face chaos when using them.  <!--- by some dude who needs a drink -->
+
