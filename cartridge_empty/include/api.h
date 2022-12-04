@@ -26,5 +26,9 @@ uint32_t getStatus();
 uint32_t getMode();
 uint32_t spriteDrop();
 uint32_t initThread(void);
+uint32_t getMachineTime();
+uint32_t getMachinePeriod();
+uint32_t getIntPendingReg();
+uint32_t rand();
 
 #endif

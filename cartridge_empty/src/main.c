@@ -10,6 +10,12 @@ int main()
 {
     int last_global = global;
     int mode;
+    
+    // new apis
+    getMachinePeriod();
+    getMachineTime();
+    getIntPendingReg();
+    rand();
 
     // draw text
     char* greeting = "Hello!";
