@@ -3,6 +3,7 @@
 #include "chip.h"
 #include "syscallinterr.h"
 #include "thread.h"
+
 extern uint8_t _erodata[];
 extern uint8_t _data[];
 extern uint8_t _edata[];

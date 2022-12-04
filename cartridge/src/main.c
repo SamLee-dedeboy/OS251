@@ -34,16 +34,6 @@ int down_block[9][7] = {
     {0, 0, 0, 0, 0, 0, 0}};
 int pressed = 0;
 
-uint32_t Thread(void *param)
-{
-    while (1)
-    {
-        test_num++;
-        global = systemcall(SYSTIMER);
-        printtext(WRITE_TEXT, "thread test_num      %d\n", test_num);
-        printtext(WRITE_TEXT, "thread global      %d\n", global);
-    }
-}
 void line_elimination()
 {
     int line_sum = 0;
