@@ -74,17 +74,7 @@ Graphics utility functions are implemented and listed in `graphic.h`
 
 
 ## System call APIs
-- `getTicks`
-- `getTimer`
+- `getTimer`: returns a value that is increased upon every iterrupt. Value rounds back to 0 when it reaches 999.
 - `getMode`: get current video mode
 - `getStatus`: get controller status
 - multithreading api not merged yet
-
-
-## 🔴 Notes for us: 
-- `spriteDrop()` doesn't need to be implemented as a system call
-- sample usage of multithreading
-- why is `SystemCall()` declared inside `graphic.h`?
-- what is the difference between `getTicks` and `getTimer`?
-- how to change refresh rate?
-- update API documentation
