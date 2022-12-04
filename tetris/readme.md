@@ -1,5 +1,6 @@
 ## Current Progress
 ![Screenshot](Screenshot_1203.png)
+
 Sample usage of our API is demonstrated inside `main.c`
 ## Graphics APIs
 Graphics utility functions are implemented and listed in `graphic.h`
