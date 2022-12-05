@@ -118,15 +118,15 @@ void c_interrupt_handler(uint32_t mcause)
     controller_status = CONTROLLER;
 
     // CMD control
-    if ((((*INT_PENDING_REG) & 0x4) >> 2))
-    {
-        if (MODE_CONTROL_REG == 0x1)
-            MODE_CONTROL_REG = 0x00000000;
-        else if (MODE_CONTROL_REG == 0x0) {
-            MODE_CONTROL_REG = 0x00000001;
-        }
-    }
-    (*INT_PENDING_REG) |= ~(1U << 2);
+    // if ((((*INT_PENDING_REG) & 0x4) >> 2))
+    // {
+    //     if (MODE_CONTROL_REG == 0x1)
+    //         MODE_CONTROL_REG = 0x00000000;
+    //     else if (MODE_CONTROL_REG == 0x0) {
+    //         MODE_CONTROL_REG = 0x00000001;
+    //     }
+    // }
+    // (*INT_PENDING_REG) |= ~(1U << 2);
     // CMD control end
 }
 
