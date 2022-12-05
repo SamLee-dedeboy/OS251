@@ -10,8 +10,11 @@
 #define CHECK_FULL_LINE_STATE 2
 #define GAME_OVER_STATE 3
 
+volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
+int init_x_pos;
+volatile int x_pos;
 
 uint8_t Block[7][4][4] = {
     {{1, 2, 4, 5}, {1, 5, 6, 10}, {5, 6, 8, 9}, {0, 4, 5, 9}}, 		// S_type
@@ -42,8 +45,20 @@ int main()
     int mode;
 
     // draw text
-    char* greeting = "Hello!";
-    drawText(greeting, 6, 0, 0);
+    char *greeting = "TETRISX";
+    drawText(greeting, 7, 27, 16);
+    init_x_pos = 16*(0x40) + 27 + 7 - 1;
+    x_pos = init_x_pos;
+
+    char *instruction = "move X to START";
+    drawText(instruction, 15, 23, 20);
+
+    char *instruction2 = "or just press CMD, whatever";
+    drawText(instruction2, 27, 17, 22);
+
+    char *start_button = "START";
+    drawText(start_button, 5, 28, 30);
+
 
     // -----------draw sprite-----------------
     // setSpritePalette(1, 0, 0x00000000); // Transparent
@@ -72,13 +87,14 @@ int main()
         }
     }
     
+    backgroundDrawRec(0, MARGIN*UNIT, 0, game_board_width*UNIT, UNIT+1, 1); // top boarder
     backgroundDrawRec(0, MARGIN*UNIT - UNIT/2, 0, UNIT/2, FULL_Y, 1); // left boarder
     backgroundDrawRec(0, FULL_X - (MARGIN*UNIT), 0, UNIT/2, FULL_Y, 1); // right boarder
 
     setBackgroundControl(0, 0, 0, 5, 0); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
     // -----------end draw grid-------------
 
-    // -----------Setup game board (background num 1)-------------
+    // -----------Setup gameboard (background num 1)-------------
     setBackgroundPalette(1, S_type, 0x80990000); // Dark Red
     setBackgroundPalette(1, I_type, 0x80994C00); // Dark Orange
     setBackgroundPalette(1, J_type, 0x80999900); // Dark Yellow
@@ -90,7 +106,7 @@ int main()
 
     backgroundDrawRec(1, 0, 0, FULL_X, FULL_Y, 8); // fill with tranparent first
     setBackgroundControl(1, 0, 0, 0, 1);
-    // -----------end setup game board-------------
+    // -----------end setup gameboard-------------
 
     // ---------Draw Blocks on large sprites---------------
 
@@ -127,7 +143,7 @@ int main()
     int next_block_type = 1;
     // -----------end init blocks-------------
 
-    setVideoMode(GRAPHICS_MODE);
+    setVideoMode(TEXT_MODE);
 
     while (1)
     {
@@ -137,7 +153,7 @@ int main()
             mode = getMode();
             
             if(mode == TEXT_MODE) {
-                // do something
+                welcome_page();
             }
             else if (mode == GRAPHICS_MODE) {
                 if(game_state == CREATE_BLOCK_STATE) {
@@ -172,6 +188,10 @@ int main()
                     for(int k = 0; k < 4; k++) {
                         x_idx = block_current_x_idx + (block_nonempty_idx[k] % 4);
                         y_idx = block_current_y_idx + (block_nonempty_idx[k] / 4);
+
+                        if(y_idx == 0 || y_idx == 1) {
+                            break;
+                        }
                         game_board[y_idx][x_idx] = true;
                         backgroundDrawRec(1, (x_idx+MARGIN)*UNIT, y_idx*UNIT, UNIT, UNIT, current_block_type);
                     }
@@ -182,9 +202,25 @@ int main()
                     setBlockControl(current_block_type, FULL_X/2-2*UNIT, 0, 1);
 
                     // check full line
-                    game_state = CREATE_BLOCK_STATE;
+
+                    if(y_idx == 0 || y_idx == 1) {
+                        game_state = GAME_OVER_STATE;
+                    }
+                    else {
+                        game_state = CREATE_BLOCK_STATE;
+                    }
                 }
                 else if(game_state == GAME_OVER_STATE) {
+                    //clear gameboard array
+                    for(int i = 0; i < game_board_height; i++) {
+                        for(int j = 0; j < game_board_width; j++) {
+                            game_board[i][j] = false;
+                        }
+                    }
+
+                    //clear gameboard background
+                    backgroundDrawRec(1, 0, 0, FULL_X, FULL_Y, 8); // fill with tranparent
+                    setVideoMode(TEXT_MODE);
                 }
             }
             last_global = global;
@@ -192,6 +228,67 @@ int main()
     }
     return 0;
 }
+
+
+void welcome_page() {
+    controller_status = getStatus();
+    if (controller_status)
+    {
+        if((x_pos / 0x40 == 30) &&
+            ((VIDEO_MEMORY[x_pos] == 'S') || 
+             (VIDEO_MEMORY[x_pos] == 'T') || 
+             (VIDEO_MEMORY[x_pos] == 'A') ||
+             (VIDEO_MEMORY[x_pos] == 'R') || 
+             (VIDEO_MEMORY[x_pos] == 'T'))) {
+            
+            // clear 'X'
+            if (VIDEO_MEMORY[x_pos] == 'X') VIDEO_MEMORY[x_pos] = 0;
+
+            // redraw title
+            char *greeting = "TETRISX";
+            drawText(greeting, 7, 27, 16);
+            x_pos = init_x_pos;
+
+            // switch to game
+            game_state = CREATE_BLOCK_STATE;
+            setVideoMode(GRAPHICS_MODE);
+            return;
+        }
+
+        if (VIDEO_MEMORY[x_pos] == 'X') VIDEO_MEMORY[x_pos] = 0;
+        if (controller_status & 0x1)
+        {
+            if (x_pos & 0x3F)
+            {
+                x_pos--;
+            }
+        }
+        if (controller_status & 0x2)
+        {
+            if (x_pos >= 0x40)
+            {
+                x_pos -= 0x40;
+            }
+        }
+        if (controller_status & 0x4)
+        {
+            if (x_pos < 0x8C0)
+            {
+                x_pos += 0x40;
+
+            }
+        }
+        if (controller_status & 0x8)
+        {
+            if ((x_pos & 0x3F) != 0x3F)
+            {
+                x_pos++;
+            }
+        }
+        if (VIDEO_MEMORY[x_pos] == 0) VIDEO_MEMORY[x_pos] = 'X';
+    }
+}
+
 
 void drop_block_state(int32_t block_type, int *rotation) {
     controller_status = getStatus();
@@ -348,7 +445,7 @@ bool checkCollide_X(int32_t d_x) {
 
 bool checkCollide_Y() {
     int x_idx, y_idx;
-    for(int k = 0; k < 4; k++) {
+    for(int k = 3; k >= 0; k--) {
         x_idx = block_current_x_idx + (block_nonempty_idx[k] % 4);
         y_idx = block_current_y_idx + (block_nonempty_idx[k] / 4);
 

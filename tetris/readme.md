@@ -14,6 +14,11 @@
 
 ![Screenshot](Screenshot_1204_collision.png)
 
+   - add Welcome page
+   - add top boarder
+
+![Screenshot](Screenshot_1204_welcomePage.png)
+
 Sample usage of our API is demonstrated inside `main.c`
 ## Graphics APIs
 Graphics utility functions are implemented and listed in `graphic.h`
