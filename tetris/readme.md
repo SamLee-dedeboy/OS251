@@ -9,6 +9,10 @@
 ![Screenshot](Screenshot_1204_16.png)
 ![Screenshot](Screenshot_1204_8.png)
 
+   - draw block to background when on ground
+   - add collision detection
+![Screenshot](Screenshot_1204_collision.png)
+
 Sample usage of our API is demonstrated inside `main.c`
 ## Graphics APIs
 Graphics utility functions are implemented and listed in `graphic.h`
