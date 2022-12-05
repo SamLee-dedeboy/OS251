@@ -210,7 +210,9 @@ uint32_t c_syscall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t p
     case RAND:
         srand(MACHINE_TIME_REGISTER);
         return rand();
-
+    case SYSVIDEO:
+        return video;
+        break;
     case WRITE_TEXT:
         printf((char *)param2, (int)param3);
         fflush(stdout);
