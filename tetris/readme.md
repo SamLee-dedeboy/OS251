@@ -5,7 +5,9 @@
    - add grid points
    - display next block
    - scalable game unit: 8 or 16
-![Screenshot](Screenshot_1204_16.png) ![Screenshot](Screenshot_1204_8.png)
+   
+![Screenshot](Screenshot_1204_16.png)
+![Screenshot](Screenshot_1204_8.png)
 
 Sample usage of our API is demonstrated inside `main.c`
 ## Graphics APIs
