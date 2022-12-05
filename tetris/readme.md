@@ -1,24 +1,3 @@
-### 1203 progress
-![Screenshot](Screenshot_1203.png)
-
-### 1204 progress
-   - add grid points
-   - display next block
-   - scalable game unit: 8 or 16
-   
-![Screenshot](Screenshot_1204_16.png)
-![Screenshot](Screenshot_1204_8.png)
-
-   - draw block to background when on ground
-   - add collision detection
-
-![Screenshot](Screenshot_1204_collision.png)
-
-   - add Welcome page
-   - add top boarder
-
-![Screenshot](Screenshot_1204_welcomePage.png)
-
 Sample usage of our API is demonstrated inside `main.c`
 ## Graphics APIs
 Graphics utility functions are implemented and listed in `graphic.h`
