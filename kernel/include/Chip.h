@@ -13,6 +13,8 @@ typedef void (*Tfunc)(void);
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 #define CARTIDGE_STATUS (*((volatile uint32_t *)0x4000001c))
 #define MODE_CONTROL (*((volatile uint32_t *)0x500FF414))
+#define MACHINE_TIME_REGISTER (*((volatile uint32_t *)0x40000008))
+#define MACHINE_PERIOD_REGISTER (*((volatile uint32_t *)0x40000044))
 
 #define CIS 0x00000001
 #define TIMER_INTERRUPT 0x80000007

@@ -13,49 +13,26 @@ extern uint8_t _bss[];
 extern uint8_t _ebss[];
 
 typedef void (*Tfunc)(void);
-typedef struct
-{
-    uint32_t palette : 2;
-    uint32_t offsetX : 10;
-    uint32_t offsetY : 9;
-    uint32_t width : 5;
-    uint32_t hight : 5;
-} LScontrol;
-typedef struct
-{
-    uint32_t palette : 2;
-    uint32_t offsetX : 10;
-    uint32_t offsetY : 9;
-    uint32_t width : 4;
-    uint32_t hight : 4;
-    uint32_t z : 3;
-} SScontrol;
-typedef struct
-{
-    uint32_t palette : 2;
-    uint32_t offsetX : 10;
-    uint32_t offsetY : 10;
-    uint32_t z : 3;
-} BGcontrol;
-
-typedef int bool;
-#define true 1
-#define false 0
 
 volatile uint32_t *smallspritecontrol = (volatile uint32_t *)(0x500FF214);
-
-volatile LScontrol *LS_control = (volatile LScontrol *)(0x500FF114);
-volatile SScontrol *SS_control = (volatile SScontrol *)(0x500FF214);
-volatile BGcontrol *BG_control = (volatile BGcontrol *)(0x500FF100);
 volatile uint32_t *BGpalette0 = (volatile uint32_t *)0x500FC000;
 volatile uint32_t *IER = (volatile uint32_t *)(0x40000000);
 volatile uint32_t *IPR = (volatile uint32_t *)(0x40000004);
-// Thread variable
 // Thread variable
 uint32_t ThreadStack[9][2048];
 TStackRef ThreadPointers[10];
 int current_thread_num = 1;
 int running_thread_pointer = 0;
+
+volatile int video = 0;
+
+extern volatile int global;
+extern volatile uint32_t controller_status;
+volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
+int color = 1;
+int color_counter = 0;
+
+static unsigned int seed = 1;
 
 void init(void)
 {
@@ -78,28 +55,22 @@ void init(void)
     csr_enable_interrupts(); // Global interrupt enable
     MTIMECMP_LOW = 1;
     MTIMECMP_HIGH = 0;
-    *IER = *IER | COMMAND_BIT;
-    *IER = *IER | VIDEO_BIT;
-    *IER = *IER | CART_BIT;
 
-    // palette initialized
-    volatile uint32_t *palette0 = (volatile uint32_t *)0x500FD000;
-    volatile uint32_t *palette1 = (volatile uint32_t *)0x500FD400;
-
-    for (int i = 0; i < 256; i++)
-    {
-        palette0[i] = 0xff000000 + i;
-        // palette1[i] = 0xff0000ff - i;
-    }
-
-    // init small sprite location
-    // 0x 000 1111 1110 000010000 0000010000 00
-    smallspritecontrol[0] = 0x1fc10040;
+    // *IER = *IER | COMMAND_BIT;
+    // *IER = *IER | VIDEO_BIT;
+    // *IER = *IER | CART_BIT;
 }
 
-volatile int global = 0;
-volatile int video = 0;
-volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
+void srand(uint32_t newseed)
+{
+    seed = (unsigned)newseed & 0x7fffffffU;
+}
+uint32_t rand(void)
+{
+    seed = (seed * 1103515245U + 12345U) & 0x7fffffffU;
+    return (uint32_t)seed;
+}
+
 void c_interrupt_handler(void)
 {
     uint32_t mcause = csr_mcause_read();
@@ -113,11 +84,11 @@ void c_interrupt_handler(void)
         break;
     case EXTERNAL_INTERRUPT:
     {
-        if (*IPR & COMMAND_BIT)
-        {
-            cmd_interrupt();
-            return;
-        }
+        // if (*IPR & COMMAND_BIT)
+        // {
+        //     cmd_interrupt();
+        //     return;
+        // }
         if (*IPR & VIDEO_BIT)
         {
             video_interrupt();
@@ -132,6 +103,7 @@ void c_interrupt_handler(void)
     default:
         break;
     }
+    (*INT_PENDING_REG) |= ~(1U << 2);
 }
 
 void illegal_inst_interrupt()
@@ -146,7 +118,7 @@ void timer_interrupt()
     MTIMECMP_HIGH = NewCompare >> 32;
     MTIMECMP_LOW = NewCompare;
     global++;
-    if (global % 10 >= (10 - running_thread_pointer - 1) && current_thread_num >= 2)
+    if (current_thread_num >= 2)
     {
         uint32_t mepc = csr_mepc_read();
         printf("\n");
@@ -197,15 +169,6 @@ void cart_interrupt()
         *IPR = *IPR & CART_BIT;
     }
 }
-void setBGcolor(uint32_t color)
-{
-    for (int i = 0; i < 256; i++)
-    {
-        *BGpalette0 = color--;
-        BGpalette0 += 1;
-    }
-    BGpalette0 = (volatile uint32_t *)0x500FC000;
-}
 
 uint32_t c_syscall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t param4)
 {
@@ -214,33 +177,11 @@ uint32_t c_syscall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t p
     case SYSTIMER:
         return global;
         break;
-    case GET_CONTROLLER_STATUS:
+
+    case CONTROLLER_STATUS:
         return CONTROLLER;
         break;
-    case MOVE_LARGE_SPRITE:
-        LS_control[param2].offsetX += param3;
-        LS_control[param2].offsetY += param4;
-        break;
-    case MOVE_SMALL_SPRITE:
-        SS_control[param2].offsetX += param3;
-        SS_control[param2].offsetY += param4;
-        break;
-    case WRITE_TEXT:
-        printf((char *)param2, (int)param3);
-        fflush(stdout);
-        break;
-    case SYSVIDEO:
-        return video;
-    case THREAD_INITIALLIZE:
-        if (current_thread_num <= 10)
-        {
-            ThreadPointers[current_thread_num] = ContextInitialize((TStackRef)(ThreadStack[current_thread_num - 1] + 2048), (TContextEntry)param2, (void *)param3);
-            current_thread_num++;
-        }
-        break;
-    case SET_BG_COLOR:
-        setBGcolor(param2);
-        break;
+
     case MODE_STATUS:
         if (MODE_CONTROL & 1)
         {
@@ -251,10 +192,38 @@ uint32_t c_syscall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t p
             return 0;
         }
         break;
+
     case SMALL_SPRITE_DROP:
         smallspritecontrol[0] += 0x00001000;
         return 1;
         break;
+
+    case READ_MACHINE_TIME:
+        return MACHINE_TIME_REGISTER;
+
+    case READ_MACHINE_PERIOD:
+        return MACHINE_PERIOD_REGISTER;
+
+    case READ_INT_PENDING_REG:
+        return INT_PENDING_REG;
+
+    case RAND:
+        srand(MACHINE_TIME_REGISTER);
+        return rand();
+
+    case WRITE_TEXT:
+        printf((char *)param2, (int)param3);
+        fflush(stdout);
+        break;
+
+    case THREAD_INITIALLIZE:
+        if (current_thread_num <= 10)
+        {
+            ThreadPointers[current_thread_num] = ContextInitialize((TStackRef)(ThreadStack[current_thread_num - 1] + 2048), (TContextEntry)param2, (void *)param3);
+            current_thread_num++;
+        }
+        break;
+
     default:
         break;
     }

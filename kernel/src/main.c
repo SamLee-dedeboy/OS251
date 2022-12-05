@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "chip.h"
-extern volatile int global;
 typedef void (*Tfunc)(void);
+volatile int global = 42;
 
 int main()
 {
