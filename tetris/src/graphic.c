@@ -227,10 +227,10 @@ void clearTextScreen() {
 }
 
 
-uint8_t drawBlock(uint8_t type_num, uint8_t rotation, int32_t x) {
+uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 
     // set sprite data
-    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(type_num));
+    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -242,27 +242,27 @@ uint8_t drawBlock(uint8_t type_num, uint8_t rotation, int32_t x) {
     int sub_block;
     int start_x, start_y;
     for(int k = 0; k < 4; k++) {
-        sub_block = Block[type_num][rotation][k];
-        start_x = (sub_block % 4) << 4;
-        start_y = (sub_block / 4) << 4;
+        sub_block = Block[block_type][rotation][k];
+        start_x = (sub_block % 4)*UNIT;
+        start_y = (sub_block / 4)*UNIT;
 
         for(int i = 0; i < UNIT; i++) {
             for(int j = 0; j < UNIT; j++) {
-                DATA[((start_y+i)<<6) + (start_x+j)] = type_num;
+                DATA[((start_y+i)<<6) + (start_x+j)] = block_type;
             }
         }
     }
 
     // set sprite control
-    uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*type_num);
-    CONTROL[0] = calcLargeSpriteControl(x, 0, BLOCK_SIZE, BLOCK_SIZE, 0);
+    uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*block_type);
+    CONTROL[0] = calcLargeSpriteControl(x, 0, BLOCK_SIZE, BLOCK_SIZE, 1); // use transparent palette at initialization
 
-	return type_num + 128;
+	return block_type + 128;
 }
 
 
-void rotateBlock(uint8_t sprite_num, uint8_t rotation) {
-	uint8_t block_type = sprite_num - 128;
+void rotateBlock(uint8_t block_type, uint8_t rotation) {
+	// uint8_t block_type = sprite_num - 128;
 	// set sprite data
     uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
 
@@ -277,8 +277,8 @@ void rotateBlock(uint8_t sprite_num, uint8_t rotation) {
     int start_x, start_y;
     for(int k = 0; k < 4; k++) {
         sub_block = Block[block_type][rotation][k];
-        start_x = (sub_block % 4) << 4;
-        start_y = (sub_block / 4) << 4;
+        start_x = (sub_block % 4)*UNIT;
+        start_y = (sub_block / 4)*UNIT;
 
         for(int i = 0; i < UNIT; i++) {
             for(int j = 0; j < UNIT; j++) {
@@ -288,39 +288,48 @@ void rotateBlock(uint8_t sprite_num, uint8_t rotation) {
     }
 }
 
-int moveBlock(uint16_t sprite_num, int32_t d_x, int32_t d_y) {
-	if(sprite_num < 0 || sprite_num > 191) return -1;
 
-	uint32_t x, y;
+void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num) {
+	// set large sprite control
+    uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*block_type);
+    CONTROL[0] = calcLargeSpriteControl(x, y, BLOCK_SIZE, BLOCK_SIZE, palette_num); // use transparent palette at initialization
 
-	// large sprite
-	uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(sprite_num - 128));
-	x = (CONTROL[0] & 0x7FE) >> 2;
-	y = (CONTROL[0] & 0x1FF000) >> 12;
-
-	// x and y are shifted +64 inside registers
-	if ((d_x < 0) && ((x-64) <= MARGIN*UNIT)) {
-		x += 0;
-	}
-	else if ((d_x > 0) && (((x-64) + BLOCK_SIZE) >= FULL_X - (MARGIN*UNIT))) {
-		x += 0;
-	}
-	else {
-		x += d_x;
-	}
-
-	y += d_y;
-
-	CONTROL[0] &= ~(0X1FFFFC);
-	CONTROL[0] |= (x<<2);
-	CONTROL[0] |= (y<<12);
-
-	return 1;
+	return;
 }
 
+// int moveBlock(uint16_t sprite_num, int32_t d_x, int32_t d_y) {
+// 	if(sprite_num < 0 || sprite_num > 191) return -1;
 
-int checkCollide_X(uint16_t sprite_num, uint8_t rotation, int32_t d_x) {
-	uint8_t block_type = sprite_num - 128;
+// 	uint32_t x, y;
+
+// 	// large sprite
+// 	uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(sprite_num - 128));
+// 	x = (CONTROL[0] & 0x7FE) >> 2;
+// 	y = (CONTROL[0] & 0x1FF000) >> 12;
+
+// 	// x and y are shifted +64 inside registers
+// 	if ((d_x < 0) && ((x-64) <= MARGIN*UNIT)) {
+// 		x += 0;
+// 	}
+// 	else if ((d_x > 0) && (((x-64) + BLOCK_SIZE) >= FULL_X - (MARGIN*UNIT))) {
+// 		x += 0;
+// 	}
+// 	else {
+// 		x += d_x;
+// 	}
+
+// 	y += d_y;
+
+// 	CONTROL[0] &= ~(0X1FFFFC);
+// 	CONTROL[0] |= (x<<2);
+// 	CONTROL[0] |= (y<<12);
+
+// 	return 1;
+// }
+
+
+int checkCollide_X(uint8_t block_type, uint8_t rotation, int32_t d_x) {
+	// uint8_t block_type = sprite_num - 128;
 	uint32_t x;
 
 	// large sprite
@@ -357,8 +366,8 @@ int checkCollide_X(uint16_t sprite_num, uint8_t rotation, int32_t d_x) {
 }
 
 
-int checkCollide_Y(uint16_t sprite_num, uint8_t rotation, int32_t d_y) {
-	uint8_t block_type = sprite_num - 128;
+int checkCollide_Y(uint8_t block_type, uint8_t rotation, int32_t d_y) {
+	// uint8_t block_type = sprite_num - 128;
 	uint32_t y;
 
 	// large sprite

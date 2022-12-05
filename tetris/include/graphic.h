@@ -27,9 +27,9 @@
 #define MODE_CONTROL_REGISTER 0x500FF414
 
 // Definitions for tetris game
-#define UNIT 16 // 16 pixels
-#define BLOCK_SIZE 64 // a block consists of 4UNIT * 4UNIT
-#define MARGIN 10 // how many amount of UNIT
+#define UNIT 16 // 16 pixels or 8 pixels
+#define BLOCK_SIZE UNIT*4 // a block consists of 4UNIT * 4UNIT
+#define MARGIN 10*(16/UNIT) // how many amount of UNIT
 
 #define S_type 0
 #define I_type 1
@@ -64,11 +64,11 @@ int drawText(char* text, uint32_t length, int32_t x, int32_t y);
 void clearTextScreen();
 
 // ---------Functions for tetris game-----------
-uint8_t drawBlock(uint8_t type_num, uint8_t rotation, int32_t x);
-void rotateBlock(uint8_t sprite_num, uint8_t rotation);
-int moveBlock(uint16_t sprite_num, int32_t d_x, int32_t d_y); // add border conditions
-int checkCollide_X(uint16_t sprite_num, uint8_t rotation, int32_t d_x);
-int checkCollide_Y(uint16_t sprite_num, uint8_t rotation, int32_t d_y);
-void setBlockPosition(uint8_t block_type, int32_t block_current_x, int32_t block_current_y);
+uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x);
+void rotateBlock(uint8_t block_type, uint8_t rotation);
+void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num);
+// int moveBlock(uint16_t sprite_num, int32_t d_x, int32_t d_y); // add border conditions
+int checkCollide_X(uint8_t block_type, uint8_t rotation, int32_t d_x);
+int checkCollide_Y(uint8_t block_type, uint8_t rotation, int32_t d_y);
 
 #endif
