@@ -126,7 +126,7 @@ void c_interrupt_handler(uint32_t mcause)
     //         MODE_CONTROL_REG = 0x00000001;
     //     }
     // }
-    // (*INT_PENDING_REG) |= ~(1U << 2);
+    (*INT_PENDING_REG) |= ~(1U << 2);
     // CMD control end
 }
 
