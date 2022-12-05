@@ -20,15 +20,19 @@
 #define Z_type 6
 
 // game states
-#define INIT_GAME_STATE 0
-#define CREATE_BLOCK_STATE 1
-#define DROP_BLOCK_STATE 2
-#define CHECK_FULL_LINE_STATE 3
-#define GAME_OVER_STATE 4
+#define WELCOME_PAGE_STATE 0
+#define INIT_GAME_STATE 1
+#define CREATE_BLOCK_STATE 2
+#define DROP_BLOCK_STATE 3
+#define DRAW_TO_BG_STATE 4
+#define DELETE_FULL_LINE_STATE 5
+#define GAME_OVER_STATE 6
 
 // ---------Functions for tetris game-----------
+void welcome_page_state();
 void init_game_state(int *rotation);
 void drop_block_state(int32_t sprite_num, int *rotation);
+void delete_full_line_state();
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x);
 void rotateBlock(uint8_t block_type, uint8_t rotation);
 void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num);

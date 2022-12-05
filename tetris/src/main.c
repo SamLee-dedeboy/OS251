@@ -25,11 +25,13 @@ uint8_t Block[7][4][4] = {
 int UNIT;       // 16 pixels or 8 pixels
 int BLOCK_SIZE; // a block consists of 4UNIT * 4UNIT
 int MARGIN;     // how many amount of UNIT
-int game_state = INIT_GAME_STATE;
+int game_state = WELCOME_PAGE_STATE;
 
 int game_board_width;  // max: (FULL_X/8 - 2*MARGIN) = 24; min: (FULL_X/16 - 2*MARGIN) = 12
 int game_board_height; // max: (FULL_Y/8) = 36; min: (FULL_X/16) = 18
 bool game_board[36][24] = {false};
+int fullLine[4] = {-1};
+int full_line_count = 0;
 
 int block_nonempty_idx[4] = {0};
 int block_current_x_idx = 0; // index relative to game_board
@@ -40,7 +42,7 @@ volatile int x_pos;
 
 int main()
 {
-    (*INT_ENABLE_REG) = 0x3; // disable cmd interrupt
+    // (*INT_ENABLE_REG) = 0x3; // disable cmd interrupt
     int last_global = global;
     int mode;
 
@@ -53,15 +55,15 @@ int main()
     char *instruction = "move X to START";
     drawText(instruction, 15, 23, 20);
 
-    char *instruction2 = "or just press CMD, whatever";
-    drawText(instruction2, 27, 17, 22);
+    // char *instruction2 = "or just press CMD, whatever";
+    // drawText(instruction2, 27, 17, 22);
 
     char *start_button = "START";
     drawText(start_button, 5, 20, 30);
     drawText(start_button, 5, 38, 30);
 
-    char *difficulty = "(casual)       (not too casual)";
-    drawText(difficulty, 31, 18, 32);
+    char *difficulty = "(casual)     (not too casual)";
+    drawText(difficulty, 29, 19, 32);
     // -------end draw Welcome Page--------------
 
     // -----------Set grid palette(background num 0)-----------------
@@ -113,6 +115,7 @@ int main()
     int next_block_type = 1;
     // -----------end init block palettes-------------
 
+    game_state = WELCOME_PAGE_STATE;
     setVideoMode(TEXT_MODE);
 
     while (1)
@@ -123,11 +126,15 @@ int main()
             mode = getMode();
             
             if(mode == TEXT_MODE) {
-                welcome_page();
+                if(game_state == WELCOME_PAGE_STATE) {
+                    welcome_page_state();
+                }
+                else if(game_state == INIT_GAME_STATE) {
+                    init_game_state(&rotation);
+                }
             }
             else if (mode == GRAPHICS_MODE) {
                 if(game_state == INIT_GAME_STATE) {
-                    init_game_state(&rotation);
                 }
                 else if(game_state == CREATE_BLOCK_STATE) {
                     // random generate next block
@@ -136,7 +143,7 @@ int main()
                     if(next_block_type == current_block_type) next_block_type++;
                     if(next_block_type == 7) next_block_type = 0;
 
-                    // visuallize current block
+                    // visualize current block
                     setBlockControl(current_block_type, FULL_X/2-2*UNIT, 0, 0);
 
                     // visualize next blockgame_board
@@ -155,7 +162,7 @@ int main()
                 else if(game_state == DROP_BLOCK_STATE) {
                     drop_block_state(current_block_type, &rotation);
                 }
-                else if(game_state == CHECK_FULL_LINE_STATE) {
+                else if(game_state == DRAW_TO_BG_STATE) {
                     // draw current block to background
                     int x_idx, y_idx;
                     for(int k = 0; k < 4; k++) {
@@ -168,22 +175,47 @@ int main()
                         game_board[y_idx][x_idx] = true;
                         backgroundDrawRec(1, (x_idx+MARGIN)*UNIT, y_idx*UNIT, UNIT, UNIT, current_block_type);
                     }
+
+                    // check full line
+                    full_line_count = 0;
+                    bool isFullLine = true;
+                    for(int i = game_board_height-1; i >= 0; i--) {
+                        isFullLine = true;
+                        for(int j = 0; j < game_board_width; j++) {
+                            isFullLine &= game_board[i][j];
+                        }
+                        if(isFullLine){ 
+                            fullLine[full_line_count] = i;
+                            full_line_count++;
+                        }
+                    }
                     
                     // set current block to zero-rotation and transparent
                     rotateBlock(current_block_type, 0);
                     setBlockControl(current_block_type, FULL_X/2-2*UNIT, 0, 1);
 
-                    // check full line
 
                     if(y_idx == 0 || y_idx == 1) {
                         game_state = GAME_OVER_STATE;
                     }
                     else {
-                        game_state = CREATE_BLOCK_STATE;
+                        game_state = DELETE_FULL_LINE_STATE;
                     }
                 }
+                else if(game_state == DELETE_FULL_LINE_STATE) {
+                    // bool stop = false;
+                    if(full_line_count == 0) {
+                        //no deletion needed
+                    }
+                    else {
+                        delete_full_line_state();
+                    }
+
+                    // game_state = (stop)? GAME_OVER_STATE : CREATE_BLOCK_STATE;
+                    game_state = CREATE_BLOCK_STATE;
+                }
                 else if(game_state == GAME_OVER_STATE) {
-                    //clear gameboard array
+                    //clear game_board array
                     for(int i = 0; i < game_board_height; i++) {
                         for(int j = 0; j < game_board_width; j++) {
                             game_board[i][j] = false;
@@ -193,12 +225,73 @@ int main()
                     //clear gameboard background
                     setVideoMode(TEXT_MODE);
                     backgroundDrawRec(1, 0, 0, FULL_X, FULL_Y, 8); // fill with tranparent
+                    game_state = WELCOME_PAGE_STATE;
                 }
             }
             last_global = global;
         }
     }
     return 0;
+}
+
+
+void welcome_page_state() {
+    controller_status = getStatus();
+    if (controller_status)
+    {
+        if((x_pos / 0x40 == 30) &&
+            ((VIDEO_MEMORY[x_pos] == 'S') || 
+             (VIDEO_MEMORY[x_pos] == 'T') || 
+             (VIDEO_MEMORY[x_pos] == 'A') ||
+             (VIDEO_MEMORY[x_pos] == 'R') || 
+             (VIDEO_MEMORY[x_pos] == 'T'))) {
+            
+            // clear 'X'
+            if (VIDEO_MEMORY[x_pos] == 'X') VIDEO_MEMORY[x_pos] = 0;
+            current_game_unit = ((x_pos % 0x40) < 0x20)? 0 : 1;
+
+            // redraw title
+            char *greeting = "TETRISX";
+            drawText(greeting, 7, 27, 16);
+            x_pos = init_x_pos;
+
+            // switch to game
+            game_state = INIT_GAME_STATE;
+            return;
+        }
+
+        if (VIDEO_MEMORY[x_pos] == 'X') VIDEO_MEMORY[x_pos] = 0;
+        if (controller_status & 0x1)
+        {
+            if (x_pos & 0x3F)
+            {
+                x_pos--;
+            }
+        }
+        if (controller_status & 0x2)
+        {
+            if (x_pos >= 0x40)
+            {
+                x_pos -= 0x40;
+            }
+        }
+        if (controller_status & 0x4)
+        {
+            if (x_pos < 0x8C0)
+            {
+                x_pos += 0x40;
+
+            }
+        }
+        if (controller_status & 0x8)
+        {
+            if ((x_pos & 0x3F) != 0x3F)
+            {
+                x_pos++;
+            }
+        }
+        if (VIDEO_MEMORY[x_pos] == 0) VIDEO_MEMORY[x_pos] = 'X';
+    }
 }
 
 
@@ -241,8 +334,8 @@ void init_game_state(int *rotation) {
         }
 
         backgroundDrawRec(0, MARGIN*UNIT, 0, game_board_width*UNIT, UNIT+1, 1); // top boarder
-        backgroundDrawRec(0, MARGIN*UNIT - UNIT/2, 0, UNIT/2, FULL_Y, 1); // left boarder
-        backgroundDrawRec(0, FULL_X - (MARGIN*UNIT), 0, UNIT/2, FULL_Y, 1); // right boarder
+        backgroundDrawRec(0, MARGIN*UNIT - UNIT, 0, UNIT, FULL_Y, 1); // left boarder
+        backgroundDrawRec(0, FULL_X - (MARGIN*UNIT), 0, UNIT, FULL_Y, 1); // right boarder
 
         setBackgroundControl(0, 0, 0, 5, 0); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
         // -----------end draw grid---------------
@@ -262,67 +355,8 @@ void init_game_state(int *rotation) {
     }
 
     game_state = CREATE_BLOCK_STATE;
+    setVideoMode(GRAPHICS_MODE);
     return;
-}
-
-void welcome_page() {
-    controller_status = getStatus();
-    if (controller_status)
-    {
-        if((x_pos / 0x40 == 30) &&
-            ((VIDEO_MEMORY[x_pos] == 'S') || 
-             (VIDEO_MEMORY[x_pos] == 'T') || 
-             (VIDEO_MEMORY[x_pos] == 'A') ||
-             (VIDEO_MEMORY[x_pos] == 'R') || 
-             (VIDEO_MEMORY[x_pos] == 'T'))) {
-            
-            // clear 'X'
-            if (VIDEO_MEMORY[x_pos] == 'X') VIDEO_MEMORY[x_pos] = 0;
-            current_game_unit = ((x_pos % 0x40) < 0x20)? 0 : 1;
-
-            // redraw title
-            char *greeting = "TETRISX";
-            drawText(greeting, 7, 27, 16);
-            x_pos = init_x_pos;
-
-            // switch to game
-            game_state = INIT_GAME_STATE;
-            setVideoMode(GRAPHICS_MODE);
-            return;
-        }
-
-        if (VIDEO_MEMORY[x_pos] == 'X') VIDEO_MEMORY[x_pos] = 0;
-        if (controller_status & 0x1)
-        {
-            if (x_pos & 0x3F)
-            {
-                x_pos--;
-            }
-        }
-        if (controller_status & 0x2)
-        {
-            if (x_pos >= 0x40)
-            {
-                x_pos -= 0x40;
-            }
-        }
-        if (controller_status & 0x4)
-        {
-            if (x_pos < 0x8C0)
-            {
-                x_pos += 0x40;
-
-            }
-        }
-        if (controller_status & 0x8)
-        {
-            if ((x_pos & 0x3F) != 0x3F)
-            {
-                x_pos++;
-            }
-        }
-        if (VIDEO_MEMORY[x_pos] == 0) VIDEO_MEMORY[x_pos] = 'X';
-    }
 }
 
 
@@ -338,6 +372,7 @@ void drop_block_state(int32_t block_type, int *rotation) {
         }
         if (controller_status & 0x2) // up
         {
+            // TODO: rotation check
             *rotation = (*rotation == 3)? 0 : *rotation + 1;
             rotateBlock(block_type, *rotation);
         }
@@ -348,7 +383,7 @@ void drop_block_state(int32_t block_type, int *rotation) {
                 block_current_y_idx++;
             }
             else {
-                game_state = CHECK_FULL_LINE_STATE;
+                game_state = DRAW_TO_BG_STATE;
             }
         }
         if (controller_status & 0x8) // right
@@ -366,9 +401,53 @@ void drop_block_state(int32_t block_type, int *rotation) {
             block_current_y_idx++;
         }
         else {
-            game_state = CHECK_FULL_LINE_STATE;
+            game_state = DRAW_TO_BG_STATE;
         }
     }
+
+    return;
+}
+
+
+void delete_full_line_state() {
+    uint8_t *DATA = (volatile uint8_t *)(BACKGROUND_DATA_ADDRESS + (0x24000)*1); // background_num = 1
+    
+    // game board
+    int k = 0;
+    int jump = 0;
+    for(int i = game_board_height-1; i > 0; i--) {
+        while((k != full_line_count) && (((jump == 0) && (i == fullLine[k])) || ((i-jump) == fullLine[k]))) {
+            jump++;
+            k++;
+        }
+
+        // gameboard
+        for(int j = 0; j < game_board_width; j++) {
+            if((i-jump) < 0) {
+                game_board[i][j] = false;
+            }
+            else {
+                game_board[i][j] = game_board[i-jump][j];
+            }
+        }
+
+        // background data
+        for(int l = 0; l < UNIT; l++) {
+            for(int j = MARGIN*UNIT; j < (MARGIN+game_board_width+1)*UNIT; j++) {
+                if((i-jump) < 0) {
+                    DATA[(0x200)*((i*UNIT)+l) + j] = 8;
+                }
+                else {
+                    DATA[(0x200)*((i*UNIT)+l) + j] = DATA[(0x200)*(((i-jump)*UNIT)+l) + j];
+                }
+            }
+        }
+    }
+
+    for(int i = 0; i < 4; i++) {
+        fullLine[i] = -1;
+    }
+    full_line_count = 0;
 
     return;
 }
