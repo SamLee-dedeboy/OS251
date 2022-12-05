@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "api.h"
 #include "systemcall.h"
+#include "tetris.h"
 
 // define game states
 #define CREATE_BLOCK_STATE 0
@@ -11,8 +12,18 @@
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
+
+uint8_t Block[7][4][4] = {
+    {{1, 2, 4, 5}, {1, 5, 6, 10}, {5, 6, 8, 9}, {0, 4, 5, 9}}, 		// S_type
+    {{4, 5, 6, 7}, {2, 6, 10, 14}, {8, 9, 10, 11}, {1, 5, 9, 13}}, 	// I_type
+    {{2, 4, 5, 6}, {1, 5, 9, 10}, {4, 5, 6, 8}, {0, 1, 5, 9}}, 		// J_type
+    {{0, 4, 5, 6}, {1, 2, 5, 9}, {4, 5, 6, 10}, {1, 5, 8, 9}}, 		// L_type
+    {{1, 2, 5, 6}, {1, 2, 5, 6}, {1, 2, 5, 6}, {1, 2, 5, 6}}, 		// O_type
+    {{1, 4, 5, 6}, {1, 5, 6, 9}, {4, 5, 6, 9}, {1, 4, 5, 9}}, 		// T_type
+    {{0, 1, 5, 6}, {2, 5, 6, 9}, {4, 5, 9, 10}, {1, 4, 5, 8}} 		// Z_type
+};
+
 int game_state = CREATE_BLOCK_STATE;
-extern int Block;
 bool game_board[FULL_Y/UNIT][(FULL_X/UNIT)-2*MARGIN] = {false};
 int block_nonempty_idx[4] = {0};
 int block_current_x = 0;
@@ -201,4 +212,172 @@ void drop_block_state(int32_t block_type, int *rotation) {
     }
 
     return;
+}
+
+
+uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
+
+    // set sprite data
+    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
+
+    // clear to transparent
+    for(int i = 0; i < 64; i++){
+        for(int j = 0; j < 64; j++){
+            DATA[(i<<6) + j] = 8;
+        }
+    }
+
+    int sub_block;
+    int start_x, start_y;
+    for(int k = 0; k < 4; k++) {
+        sub_block = Block[block_type][rotation][k];
+        start_x = (sub_block % 4)*UNIT;
+        start_y = (sub_block / 4)*UNIT;
+
+        for(int i = 0; i < UNIT; i++) {
+            for(int j = 0; j < UNIT; j++) {
+                DATA[((start_y+i)<<6) + (start_x+j)] = block_type;
+            }
+        }
+    }
+
+    // set sprite control
+    uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*block_type);
+    CONTROL[0] = calcLargeSpriteControl(x, 0, BLOCK_SIZE, BLOCK_SIZE, 1); // use transparent palette at initialization
+
+	return block_type + 128;
+}
+
+
+void rotateBlock(uint8_t block_type, uint8_t rotation) {
+	// uint8_t block_type = sprite_num - 128;
+	// set sprite data
+    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
+
+    // clear to transparent
+    for(int i = 0; i < 64; i++){
+        for(int j = 0; j < 64; j++){
+            DATA[(i<<6) + j] = 8;
+        }
+    }
+
+    int sub_block;
+    int start_x, start_y;
+    for(int k = 0; k < 4; k++) {
+        sub_block = Block[block_type][rotation][k];
+        start_x = (sub_block % 4)*UNIT;
+        start_y = (sub_block / 4)*UNIT;
+
+        for(int i = 0; i < UNIT; i++) {
+            for(int j = 0; j < UNIT; j++) {
+                DATA[((start_y+i)<<6) + (start_x+j)] = block_type;
+            }
+        }
+    }
+}
+
+
+void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num) {
+	// set large sprite control
+    uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*block_type);
+    CONTROL[0] = calcLargeSpriteControl(x, y, BLOCK_SIZE, BLOCK_SIZE, palette_num); // use transparent palette at initialization
+
+	return;
+}
+
+// int moveBlock(uint16_t sprite_num, int32_t d_x, int32_t d_y) {
+// 	if(sprite_num < 0 || sprite_num > 191) return -1;
+
+// 	uint32_t x, y;
+
+// 	// large sprite
+// 	uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(sprite_num - 128));
+// 	x = (CONTROL[0] & 0x7FE) >> 2;
+// 	y = (CONTROL[0] & 0x1FF000) >> 12;
+
+// 	// x and y are shifted +64 inside registers
+// 	if ((d_x < 0) && ((x-64) <= MARGIN*UNIT)) {
+// 		x += 0;
+// 	}
+// 	else if ((d_x > 0) && (((x-64) + BLOCK_SIZE) >= FULL_X - (MARGIN*UNIT))) {
+// 		x += 0;
+// 	}
+// 	else {
+// 		x += d_x;
+// 	}
+
+// 	y += d_y;
+
+// 	CONTROL[0] &= ~(0X1FFFFC);
+// 	CONTROL[0] |= (x<<2);
+// 	CONTROL[0] |= (y<<12);
+
+// 	return 1;
+// }
+
+
+int checkCollide_X(uint8_t block_type, uint8_t rotation, int32_t d_x) {
+	// uint8_t block_type = sprite_num - 128;
+	uint32_t x;
+
+	// large sprite
+	uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(block_type));
+	x = (CONTROL[0] & 0x7FE) >> 2;
+
+	// x and y are shifted +64 inside registers
+	int sub_block, start_x, end_x;
+	if (d_x < 0) {
+		for(int k = 0; k < 4; k++) {
+			sub_block = Block[block_type][rotation][k];
+			start_x = sub_block % 4;
+
+			if((x-64)+(start_x*UNIT) <= MARGIN*UNIT) {
+				return 1;
+			}
+		}
+	}
+	else if (d_x > 0) {
+		for(int k = 0; k < 4; k++) {
+			sub_block = Block[block_type][rotation][k];
+			end_x = (sub_block % 4) + 1;
+			
+			if(((x-64)+(end_x*UNIT)) >= (FULL_X - (MARGIN*UNIT))) {
+				return 1;
+			}
+		}
+	}
+	else {
+		return 0;
+	}
+
+	return 0;
+}
+
+
+int checkCollide_Y(uint8_t block_type, uint8_t rotation, int32_t d_y) {
+	// uint8_t block_type = sprite_num - 128;
+	uint32_t y;
+
+	// large sprite
+	uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(block_type));
+	y = (CONTROL[0] & 0x1FF000) >> 12;
+
+
+	// x and y are shifted +64 inside registers
+	int sub_block, end_y;
+	if (d_y > 0) {
+		for(int k = 0; k < 4; k++) {
+			sub_block = Block[block_type][rotation][k];
+			end_y = (sub_block / 4) + 1;
+			
+			if(((y-64)+(end_y*UNIT)) >= FULL_Y) {
+				return 1;
+			}
+		}
+	}
+	else {
+		return 0;
+	}
+
+	return 0;
 }
