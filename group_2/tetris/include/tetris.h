@@ -5,7 +5,6 @@
 
 #ifndef GRAPHIC_H
 #define GRAPHIC_H
-// #include "graphic.h"
 #endif
 
 // ---------Definitions for tetris game-----------
@@ -56,35 +55,39 @@ void drop_block_state(int32_t sprite_num, int *rotation);
 void delete_full_line_state();
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x);
 void rotateBlock(uint8_t block_type, uint8_t rotation);
-void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num);
 bool checkCollide_X(int32_t d_x);
 bool checkCollide_Y();
 
 // ---------Functions complement other groups' missing APIs-----------
-// int drawText(char* text, uint32_t length, uint32_t x, uint32_t y);
-
 uint32_t getMode();
 
 // Video Controls
-int setVideoMode(uint32_t mode);
 void setRefreshRate(uint32_t rate);
 
 // Backgrounds
 uint32_t merge_xy(uint32_t x, uint32_t y);
-// int setBackgroundPalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB);
 int backgroundDrawRec(uint32_t background_num, uint32_t xy, uint32_t wh, uint32_t colorEntry);
-int setBackgroundControl(uint32_t background_num, uint32_t xy, uint32_t z, uint32_t palette_num);
-int changeBackgroundPalette(uint32_t background_num, uint32_t palette_num);
 
 // Sprites
-int setSpritePalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB);
-uint16_t createRecSprite(uint32_t xy, uint32_t wh, uint32_t palette_num, uint32_t colorEntry);
 int moveSprite(uint32_t sprite_num, uint32_t d_x, uint32_t d_y);
-int changeSpritePalette(uint32_t sprite_num, uint32_t palette_num);
-uint32_t calcSmallSpriteControl_ours(uint32_t xy, uint32_t wh, uint32_t p);
-uint32_t calcLargeSpriteControl_ours(uint32_t xy, uint32_t wh, uint32_t p);
 
 //Text 
 int drawText(char* text, uint32_t length, uint32_t x, uint32_t y);
-void clearTextScreen();
+
+// replaced by group_2 APIs.
+// group_2: setLargeSpriteControl(block_type, calcLargeSpriteControl(x, y, BLOCK_SIZE, BLOCK_SIZE, palette_num)) (group_2 API)
+// ours:    void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num);
+// group_2: setTextMode(), setGraphicsMode()
+// ours:    int setVideoMode(uint32_t mode)
+// group_2: setBackgroundColor
+// ours:    setBackgroundPalette
+// group_2: setBackgroundSpriteControl(background_num, calcBackgroundControl(x,y,z,p))
+// ours:    int setBackgroundControl(uint32_t background_num, uint32_t xy, uint32_t z, uint32_t palette_num)
+// group_2: setColor
+// ours:    setSpritePalette
+// group_2: calcSmallSpriteControl
+// ours:    calcSmallSpriteControl
+// group_2: calcLargeSpriteControl
+// ours:    calcLargeSpriteControl
+
 
