@@ -3,7 +3,7 @@
 
 // Nuber of sprites: 0~127: small sprite; 128~191: large sprite
 int small_sprite_count = 0; // max: 128 small sprites
-int large_sprite_count = 0; // max: 64 large sprites
+int large_sprite_count = 7; // max: 64 large sprites // 0~6 are reserved for tetris blocks
 int down_sprite_count = 0; 
 
 
@@ -99,7 +99,7 @@ uint16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t p
 
 		// set sprite control
 		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*small_sprite_count);
-		CONTROL[0] = calcSmallSpriteControl(x, y, 0, w, h, palette_num);
+		CONTROL[0] = calcSmallSpriteControl(x, y, 4, w, h, palette_num);
 
 		small_sprite_count++;
 	}
