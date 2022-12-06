@@ -40,8 +40,8 @@ volatile int x_pos;
 
 int main()
 {
-    (*INT_ENABLE_REG) = 0x3; // disable cmd interrupt
-    volatile uint32_t int_pending_reg = getIntPendingReg();
+    // (*INT_ENABLE_REG) = 0x3; // disable cmd interrupt
+    volatile uint32_t int_pending_reg;
 
     int last_global = global;
     int mode;
@@ -123,7 +123,8 @@ int main()
         if(global != last_global) {
 
             mode = getMode();
-            if (((int_pending_reg & 0x4) >> 2))
+            int_pending_reg = getIntPendingReg();
+            if(((int_pending_reg & 0x4) >> 2))
             {
                 if (mode == GRAPHICS_MODE)
                     setVideoMode(TEXT_MODE);
@@ -131,7 +132,7 @@ int main()
                     setVideoMode(GRAPHICS_MODE);
                 }
             }
-            int_pending_reg |= ~(1U << 2);
+            // int_pending_reg |= ~(1U << 2);
             
             if(mode == TEXT_MODE) {
                 welcome_page();

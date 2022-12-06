@@ -49,7 +49,9 @@ __attribute__((always_inline)) inline void csr_disable_interrupts(void)
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 #define MODE_CONTROL_REG (*((volatile uint32_t *)0x500FF414))
 #define MACHINE_TIME_REGISTER (*((volatile uint32_t *)0x40000008))
-#define MACHINE_PERIOD_REGISTER (*((volatile uint32_t *)0x40000044))
+#define MACHINE_PERIOD_REGISTER (*((volatile uint32_t *)0x40000040))
+#define INT_ENABLE_REG (*(volatile uint32_t *)(0x40000000))
+#define INT_PENDING_REG (*(volatile uint32_t *)(0x40000004))
 
 volatile uint32_t *smallspritecontrol = (volatile uint32_t *)(0x500FF214);
 
@@ -95,7 +97,6 @@ void init(void)
 
 extern volatile int global;
 extern volatile uint32_t controller_status;
-volatile uint32_t *INT_PENDING_REG = (volatile uint32_t *)(0x40000004);
 int color = 1;
 int color_counter = 0;
 
@@ -126,7 +127,7 @@ void c_interrupt_handler(uint32_t mcause)
     //         MODE_CONTROL_REG = 0x00000001;
     //     }
     // }
-    (*INT_PENDING_REG) |= ~(1U << 2);
+    // (*INT_PENDING_REG) |= ~(1U << 2);
     // CMD control end
 }
 
@@ -161,7 +162,10 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     case READ_MACHINE_PERIOD:
         return MACHINE_PERIOD_REGISTER;
 
+    // CMD Interrupt 
     case READ_INT_PENDING_REG:
+        INT_ENABLE_REG = INT_ENABLE_REG | 0x4;
+        INT_PENDING_REG = 0x0;
         return INT_PENDING_REG;
     
     case RAND:
