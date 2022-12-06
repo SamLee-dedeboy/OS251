@@ -82,5 +82,6 @@ SECTIONS
 
     __global_pointer$ = MIN(_sdata + 0x800,
 		            MAX(_data + 0x800, _ebss - 0x800));
+    _heapbase = MAX(_edata,MAX(_esdata,_ebss));
 
 }
