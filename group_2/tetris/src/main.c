@@ -143,7 +143,8 @@ int main()
                 else if(game_state == CREATE_BLOCK_STATE) {
                     // random generate next block
                     current_block_type = next_block_type;
-                    next_block_type = global % 7;
+                    // next_block_type = global % 7;
+                    next_block_type = genRandom(7);
                     if(next_block_type == current_block_type) next_block_type++;
                     if(next_block_type == 7) next_block_type = 0;
 
@@ -412,10 +413,9 @@ void drop_block_state(int32_t block_type, int *rotation) {
     return;
 }
 
-
 void delete_full_line_state() {
+    //group_2 no changing background data APIs.
     uint8_t *DATA = (volatile uint8_t *)(BACKGROUND_DATA_ADDRESS + (0x24000)*1); // background_num = 1
-	// uint8_t *DATA = (volatile uint8_t *)(getBACKGROUND_DATA_ADDRESS(1));
     
     // game board
     int k = 0;
@@ -457,13 +457,11 @@ void delete_full_line_state() {
     return;
 }
 
-
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 
+    // group_2 no changing large sprite data APIs.
     // set sprite data
     uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
-    // uint32_t block_type_test = block_type;
-    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(block_type_test));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -487,21 +485,17 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
     }
 
     // set sprite control
-    uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*block_type);
-    // uint32_t large_sprite_count_test = block_type;
-    // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
-    CONTROL[0] = calcLargeSpriteControl_ours(merge_xy(x, 0), merge_xy(BLOCK_SIZE, BLOCK_SIZE), 1); // use transparent palette at initialization
+    setLargeSpriteControl(block_type, calcLargeSpriteControl(x, 0, BLOCK_SIZE, BLOCK_SIZE, 1));
 
 	return block_type + 128;
 }
 
-// group_2 no changing large sprite data API. 
 void rotateBlock(uint8_t block_type, uint8_t rotation) {
 	// uint8_t block_type = sprite_num - 128;
+
+    // group_2 no changing large sprite data API. 
 	// set sprite data
     uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
-    // uint32_t block_type_test = block_type;
-    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(block_type_test));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -526,23 +520,13 @@ void rotateBlock(uint8_t block_type, uint8_t rotation) {
     }
 }
 
+// group_2 no getting mode API. function preserved.
 uint32_t getMode() {
     if (MODE_CONTROL & 1)   return 1;
     else    return 0;
 }
 
-// setLargeSpriteControl(block_type, calcLargeSpriteControl(x, y, BLOCK_SIZE, BLOCK_SIZE, palette_num)) (group_2 API)
-// void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num) {
-// 	// set large sprite control
-//     // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
-//     uint32_t large_sprite_count_test = block_type;
-//     uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
-//     CONTROL[0] = calcLargeSpriteControl(merge_xy(x, y), merge_xy(BLOCK_SIZE, BLOCK_SIZE), palette_num); // use transparent palette at initialization
-
-// 	return;
-// }
-
-
+// Pure tetris function. function preserved.
 bool checkCollide_X(int32_t d_x) {
 	int x_idx, y_idx;
     if(d_x < 0) {
@@ -575,6 +559,7 @@ bool checkCollide_X(int32_t d_x) {
 	return false;
 }
 
+// Pure tetris function. function preserved.
 bool checkCollide_Y() {
     int x_idx, y_idx;
     for(int k = 3; k >= 0; k--) {
@@ -592,6 +577,7 @@ bool checkCollide_Y() {
 	return false;
 }
 
+// group_2 no text drawing on different positions APIs. function preserved.
 int drawText(char* text, uint32_t length, uint32_t x, uint32_t y) {
 	// ranges: x = 0~63; y = 0~35
 	if(x >= 64 || y >= 36) return -1; // position out of range
@@ -608,16 +594,8 @@ int drawText(char* text, uint32_t length, uint32_t x, uint32_t y) {
 	return 1;
 }
 
-// setTextMode, setGraphicsMode (group_2 API)
-// int setVideoMode(uint32_t mode) {
-// 	if(!(mode == 0 || mode == 1)) return -1;
 
-// 	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
-// 	VIDEO_MODE[0] &= ~(0x1);
-// 	VIDEO_MODE[0] |= mode;
-// 	return 1;
-// }
-
+// group_2 no refresh rate setting API. function preserved.
 void setRefreshRate(uint32_t rate) {
 	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
 	VIDEO_MODE[0] &= ~(0xFE);
@@ -627,15 +605,6 @@ void setRefreshRate(uint32_t rate) {
 uint32_t merge_xy (uint32_t x, uint32_t y) {
     return (x<<16) | (y);
 }
-
-// setBackgroundColor (group_2 API)
-// int setBackgroundPalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB) {
-// 	if((palette_num > 3 || entry_num > 255)) return -1;
-
-// 	uint32_t *PALETTE = (volatile uint32_t *)(BACKGROUND_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
-// 	PALETTE[0] = ARGB;
-// 	return 1;
-// }
 
 //group_2 no changing background data APIs.
 int backgroundDrawRec(uint32_t background_num, 
@@ -659,177 +628,27 @@ int backgroundDrawRec(uint32_t background_num,
 	return 1;
 }
 
-// setBackgroundSpriteControl(background_num, calcBackgroundControl(x,y,z,p)) (group_2 API)
-// int setBackgroundControl(uint32_t background_num, uint32_t xy, uint32_t z, uint32_t palette_num) {
-// 	if(background_num < 0 || background_num > 3) return -1;
-// 	if(palette_num < 0 || palette_num > 3) return -1;
-	
-// 	int32_t x = xy>>16 & (0x0000FFFF);
-// 	int32_t y = xy & (0x0000FFFF);
-
-// 	// set background control
-// 	uint32_t *CONTROL = (volatile uint32_t *)(BACKGROUND_CONTROL_ADDRESS + (0x4)*background_num);
-// 	CONTROL[0] = ((z)<<22) | ((y+288)<<12) | ((x+512)<<2) | palette_num;
-	
-// 	return 1;
-// }
-
-int changeBackgroundPalette(uint32_t background_num, uint32_t palette_num) {
-	if(background_num < 0 || background_num > 3) return -1;
-	if(palette_num < 0 || palette_num > 3) return -1;
-
-	uint32_t *CONTROL = (volatile uint32_t *)(BACKGROUND_CONTROL_ADDRESS + (0x4)*background_num);
-	CONTROL[0] &= 0xFFFFFFFC;
-	CONTROL[0] |= palette_num;
-
-	return 1;
-}
-
-// setColor (group_2 API)
-// int setSpritePalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB) {
-// 	if(palette_num > 3 || entry_num > 255) return -1;
-
-// 	uint32_t *PALETTE = (volatile uint32_t *)(SPRITE_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
-// 	PALETTE[0] = ARGB;
-// 	return 1;
-// }
-
-uint32_t calcSmallSpriteControl_ours(uint32_t xy, uint32_t wh, uint32_t p){
-    uint32_t z = 4;
-	int32_t x = xy>>16 & (0x0000FFFF);
-	int32_t y = xy & (0x0000FFFF);
-	uint32_t w = wh>>16 & (0x0000FFFF);
-	uint32_t h = wh & (0x0000FFFF);
-    return ((z)<<29) | ((h-1)<<25) | ((w-1)<<21) | ((y+16)<<12) | ((x+16)<<2) | p;
-}
-
-uint32_t calcLargeSpriteControl_ours(uint32_t xy, uint32_t wh, uint32_t p){
-	int32_t x = xy>>16 & (0x0000FFFF);
-	int32_t y = xy & (0x0000FFFF);
-	uint32_t w = wh>>16 & (0x0000FFFF);
-	uint32_t h = wh & (0x0000FFFF);
-    return ((h-33)<<26) | ((w-33)<<21) | ((y+64)<<12) | ((x+64)<<2) | p;
-}
-
-uint16_t createRecSprite(uint32_t xy, uint32_t wh, uint32_t palette_num, uint32_t colorEntry) {
-	int16_t num;
-	int32_t x = xy>>16 & (0x0000FFFF);
-	int32_t y = xy & (0x0000FFFF);
-	uint32_t w = wh>>16 & (0x0000FFFF);
-	uint32_t h = wh & (0x0000FFFF);
-
-	if(w < 16 && h < 16 ) { // create small sprite
-		if(small_sprite_count >= 128) small_sprite_count = 0;
-		num = small_sprite_count;
-
-		// set sprite data
-		uint8_t *DATA = (volatile uint8_t *)(SMALL_SPRITE_DATA_ADDRESS + (0x100)*small_sprite_count);
-		for(int i = 0; i < 16; i++){
-			for(int j = 0; j < 16; j++){
-				DATA[(i<<6) + j] = (i<h && j<w) ? colorEntry : 0;
-        	}
-    	}
-
-		// set sprite control
-		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*small_sprite_count);
-		CONTROL[0] = calcSmallSpriteControl_ours(xy, wh, palette_num);
-
-		small_sprite_count++;
-	}
-	else { // create large sprite
-		if(large_sprite_count >= 64) large_sprite_count = 0;
-		num = 128 + large_sprite_count;
-
-		// set sprite data
-		uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*large_sprite_count);
-		for(int i = 0; i < 64; i++){
-			for(int j = 0; j < 64; j++){
-				DATA[(i<<6) + j] = (i<h && j<w) ? colorEntry : 0;
-        	}
-		}
-
-		// set sprite control
-		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*large_sprite_count);
-		CONTROL[0] = calcLargeSpriteControl_ours(xy, wh, palette_num);
-
-		large_sprite_count++;
-	}
-
-	return num;
-}
-
+// contructed by group_2 APIs, fundtion preserved.
 int moveSprite(uint32_t sprite_num, uint32_t d_x, uint32_t d_y) {
 	if(sprite_num < 0 || sprite_num > 191) return -1;
 
 	uint32_t x, y;
 
 	if (sprite_num < 128 ) { // small sprite
-		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*sprite_num);
-		x = (CONTROL[0] & 0x7FE) >> 2;
-		y = (CONTROL[0] & 0x1FF000) >> 12;
-
+        x = (getSmallSpriteControl(sprite_num) & 0x7FE) >> 2;
+		y = (getSmallSpriteControl(sprite_num) & 0x1FF000) >> 12;
 		x += d_x;
 		y += d_y;
 
-		CONTROL[0] &= ~(0X1FFFFC); // clear out original x, y bits
-		CONTROL[0] |= (x<<2);
-		CONTROL[0] |= (y<<12);
+        setSmallSpriteControl(sprite_num, ((getSmallSpriteControl(sprite_num) & ~(0X1FFFFC)) | (x<<2)) | (y<<12));
 	}
 	else { // large sprite
-		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(sprite_num - 128));
-		x = (CONTROL[0] & 0x7FE) >> 2;
-		y = (CONTROL[0] & 0x1FF000) >> 12;
-
+        x = (getLargeSpriteControl(sprite_num - 128) & 0x7FE) >> 2;
+		y = (getLargeSpriteControl(sprite_num - 128) & 0x1FF000) >> 12;
 		x += d_x;
 		y += d_y;
 
-		CONTROL[0] &= ~(0X1FFFFC);
-		CONTROL[0] |= (x<<2);
-		CONTROL[0] |= (y<<12);
+        setLargeSpriteControl(sprite_num - 128, ((getLargeSpriteControl(sprite_num - 128) & ~(0X1FFFFC)) | (x<<2)) | (y<<12));
 	}
 	return 1;
-}
-
-int changeSpritePalette(uint32_t sprite_num, uint32_t palette_num) {
-	if(sprite_num < 0 || sprite_num > 191) return -1;
-	if(palette_num < 0 || palette_num > 3) return -1;
-
-	if (sprite_num < 128 ) { // small sprite
-		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*sprite_num);
-		CONTROL[0] &= 0xFFFFFFFC;
-		CONTROL[0] |= palette_num;
-	}
-	else { // large sprite
-		uint32_t num = sprite_num - 128;
-		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*num);
-		CONTROL[0] &= 0xFFFFFFFC;
-		CONTROL[0] |= palette_num;
-	}
-
-	return 1;
-}
-
-// int drawText(char* text, uint32_t length, uint32_t x, uint32_t y) {
-// 	// ranges: x = 0~63; y = 0~35
-// 	if(x >= 64 || y >= 36) return -1; // position out of range
-
-// 	char *TEXT_DATA = (volatile char *)(TEXT_DATA_ADDRESS);
-// 	for(int i = 0; i < length; i++) {
-// 		int index = y*(0x40) + x + i;
-
-// 		if(index >= 64*36) continue;
-
-// 		TEXT_DATA[index] = text[i];
-// 	}
-
-// 	return 1;
-// }
-
-void clearTextScreen() {
-	char *TEXT_DATA = (volatile char *)(TEXT_DATA_ADDRESS);
-	for(int i = 0; i < 0x900; i++) {
-		TEXT_DATA[i] = 0;
-	}
-
-	return;
 }
