@@ -16,10 +16,9 @@ _start:
     
 
 .section .text, "ax"
-.global systemcall, initThread
+.global systemcall, thread_init, printtext
 systemcall:
-    ecall
-initThread:
-    li a5,3
+thread_init:
+printtext:
     ecall
 .end
