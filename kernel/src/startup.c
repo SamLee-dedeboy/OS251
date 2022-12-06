@@ -172,7 +172,7 @@ void cart_interrupt()
     }
 }
 
-uint32_t c_system_call(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t param4)
+uint32_t c_system_call(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t param4, uint32_t param5, uint32_t param6)
 {
     switch (param1)
     {
@@ -212,9 +212,41 @@ uint32_t c_system_call(uint32_t param1, uint32_t param2, uint32_t param3, uint32
     case RAND:
         c_srand(MACHINE_TIME_REGISTER);
         return c_rand();
+
+    case get_BACKGROUND_DATA_ADDRESS:
+        return BACKGROUND_DATA_ADDRESS + (0x24000)*param2;
+    
+    case get_LARGE_SPRITE_DATA_ADDRESS:
+        return LARGE_SPRITE_DATA_ADDRESS + (0x1000)*param2;
+    
+    case get_SMALL_SPRITE_DATA_ADDRESS:
+        return SMALL_SPRITE_DATA_ADDRESS + (0x100)*param2;
+    
+    case get_BACKGROUND_PALLETE_ADDRESS:
+        return BACKGROUND_PALLETE_ADDRESS + (0x400)*param2 + (0x4)*param3;
+    
+    case get_SPRITE_PALLETE_ADDRESS:
+        return SPRITE_PALLETE_ADDRESS + (0x400)*param2 + (0x4)*param3;
+    
+    case get_TEXT_DATA_ADDRESS:
+        return TEXT_DATA_ADDRESS;
+    
+    case get_BACKGROUND_CONTROL_ADDRESS:
+        return BACKGROUND_CONTROL_ADDRESS + (0x4)*param2;
+    
+    case get_LARGE_SPRITE_CONTROL_ADDRESS:
+        return LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*param2;
+    
+    case get_SMALL_SPRITE_CONTROL_ADDRESS:
+        return SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*param2;
+    
+    case get_MODE_CONTROL_REGISTER:
+        return MODE_CONTROL_REGISTER;
+
     case SYSVIDEO:
         return video;
         break;
+
     case WRITE_TEXT:
         printf((char *)param2, (int)param3);
         fflush(stdout);
