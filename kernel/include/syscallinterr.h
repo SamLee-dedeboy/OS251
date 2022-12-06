@@ -1,26 +1,21 @@
-#ifndef __INCLUDE_STDINT__
-#define __INCLUDE_STDINT__
+#ifndef SYSTEMCALLANDINTERRUPT_H
+#define SYSTEMCALLANDINTERRUPT_H
+
 #include <stdint.h>
-#endif
-
-#ifndef SYSTEMCALL_H
-#define SYSTEMCALL_H
-
-
+// system call number
 #define SYSTIMER 0x00000001
 #define CONTROLLER_STATUS 0x00000002
 #define MODE_STATUS 0x00000003
 #define SMALL_SPRITE_DROP 0x00000004
 #define READ_MACHINE_TIME 0x00000005
 #define READ_MACHINE_PERIOD 0x00000006
-#define READ_INT_PENDING 0x00000007
+#define READ_INT_PENDING_REG 0x00000007
 #define RAND 0x00000008
-#define SYSIDEO 0x00000009
+#define SYSVIDEO 0x00000009
 
 #define THREAD_INITIALLIZE 0x00000017
 #define WRITE_TEXT 0x00000014
 
-// get addresses.
 #define get_BACKGROUND_DATA_ADDRESS 0x00000013      
 #define get_LARGE_SPRITE_DATA_ADDRESS 0x0000000A    
 #define get_SMALL_SPRITE_DATA_ADDRESS 0x0000000B    
@@ -36,7 +31,7 @@
 #define VideoMode 0x00000020
 #define RefreshRate 0x00000021
 
-// Backgrounds
+//Background
 #define Merge 0x00000022
 #define setBackgroundPalette_id 0x00000023
 #define backgroundDrawRec_id 0x00000024
@@ -54,5 +49,24 @@
 //Text
 #define drawText_id 0x0000002D
 #define clearTextScreen_id 0x0000002E
+
+
+#define BACKGROUND_DATA_ADDRESS 0x50000000      // data size: uint8_t
+#define LARGE_SPRITE_DATA_ADDRESS 0x500B4000    // data size: uint8_t
+#define SMALL_SPRITE_DATA_ADDRESS 0x500F4000    // data size: uint8_t
+#define BACKGROUND_PALLETE_ADDRESS 0x500FC000   // data size: uint32_t
+#define SPRITE_PALLETE_ADDRESS 0x500FD000       // data size: uint32_t
+#define TEXT_DATA_ADDRESS 0x500FE800            // data size: char
+#define BACKGROUND_CONTROL_ADDRESS 0x500FF100   // data size: uint32_t
+#define LARGE_SPRITE_CONTROL_ADDRESS 0x500FF114 // data size: uint32_t
+#define SMALL_SPRITE_CONTROL_ADDRESS 0x500FF214 // data size: uint32_t
+#define MODE_CONTROL_REGISTER 0x500FF414
+
+// c interrupt
+void timer_interrupt();
+void cmd_interrupt();
+void video_interrupt();
+void cart_interrupt();
+void illegal_inst_interrupt();
 
 #endif

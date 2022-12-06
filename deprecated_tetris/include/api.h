@@ -15,15 +15,20 @@
 #define MTIMECMP_HIGH (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 
-uint32_t printtext(uint32_t funName, char *text, int variable);
-typedef uint32_t (*TContextEntry)(void *param);
-uint32_t thread_init(uint32_t funName, TContextEntry entry, void *param);
+
+typedef uint32_t *TContext;
+typedef void (*TEntry)(void *);
+
 uint32_t systemcall(uint32_t funName);
 
 uint32_t getTimer();
 uint32_t getStatus();
 uint32_t getMode();
 uint32_t spriteDrop();
-uint32_t Thread(void *param);
+uint32_t initThread(void);
+uint32_t getMachineTime();
+uint32_t getMachinePeriod();
+uint32_t getIntPendingReg();
+uint32_t rand();
 
 #endif
