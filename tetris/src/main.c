@@ -124,16 +124,6 @@ int main()
         if(global != last_global) {
 
             mode = getMode();
-            int_pending_reg = getIntPendingReg();
-            if(((int_pending_reg & 0x4) >> 2))
-            {
-                if (mode == GRAPHICS_MODE)
-                    setVideoMode(TEXT_MODE);
-                else if (mode == TEXT_MODE) {
-                    setVideoMode(GRAPHICS_MODE);
-                }
-            }
-            // int_pending_reg |= ~(1U << 2);
             
             if(mode == TEXT_MODE) {
                 if(game_state == WELCOME_PAGE_STATE) {

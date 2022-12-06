@@ -430,10 +430,10 @@ uint32_t c_system_call(uint32_t param1, uint32_t param2, uint32_t param3, uint32
         return MACHINE_PERIOD_REGISTER;
 
     // CMD Interrupt 
-    case READ_INT_PENDING_REG:
-        INT_ENABLE_REG = INT_ENABLE_REG | 0x4;
-        INT_PENDING_REG = 0x0;
-        return INT_PENDING_REG;
+    // case READ_INT_PENDING_REG:
+    //     INT_ENABLE_REG = INT_ENABLE_REG | 0x4;
+    //     INT_PENDING_REG = 0x0;
+    //     return INT_PENDING_REG;
 
     case RAND:
         c_srand(MACHINE_TIME_REGISTER);
