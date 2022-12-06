@@ -27,6 +27,30 @@
 #define get_SMALL_SPRITE_CONTROL_ADDRESS 0x00000011 
 #define get_MODE_CONTROL_REGISTER 0x00000012
 
+// Video Controls
+#define VideoMode 0x00000020
+#define RefreshRate 0x00000021
+
+//Background
+#define Merge 0x00000022
+#define setBackgroundPalette_id 0x00000023
+#define backgroundDrawRec_id 0x00000024
+#define setBackgroundControl_id 0x00000025
+#define changeBackgroundPalette_id 0x00000026
+
+// Sprites
+#define setSpritePalette_id 0x00000027
+#define createRecSprite_id 0x00000028
+#define moveSprite_id 0x00000029
+#define changeSpritePalette_id 0x0000002A
+#define calcSmallSpriteControl_id 0x0000002B
+#define calcLargeSpriteControl_id 0x0000002C
+
+//Text
+#define drawText_id 0x0000002D
+#define clearTextScreen_id 0x0000002E
+
+
 #define BACKGROUND_DATA_ADDRESS 0x50000000      // data size: uint8_t
 #define LARGE_SPRITE_DATA_ADDRESS 0x500B4000    // data size: uint8_t
 #define SMALL_SPRITE_DATA_ADDRESS 0x500F4000    // data size: uint8_t
