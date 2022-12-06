@@ -15,18 +15,18 @@
 #define TEXT_MODE                    0
 #define GRAPHICS_MODE                1
 
-#define BACKGROUND_DATA_ADDRESS 0x50000000      // data size: uint8_t
-#define LARGE_SPRITE_DATA_ADDRESS 0x500B4000    // data size: uint8_t
-#define SMALL_SPRITE_DATA_ADDRESS 0x500F4000    // data size: uint8_t
-#define BACKGROUND_PALLETE_ADDRESS 0x500FC000   // data size: uint32_t
-#define SPRITE_PALLETE_ADDRESS 0x500FD000       // data size: uint32_t
-#define TEXT_DATA_ADDRESS 0x500FE800            // data size: char
-#define BACKGROUND_CONTROL_ADDRESS 0x500FF100   // data size: uint32_t
-#define LARGE_SPRITE_CONTROL_ADDRESS 0x500FF114 // data size: uint32_t
-#define SMALL_SPRITE_CONTROL_ADDRESS 0x500FF214 // data size: uint32_t
-#define MODE_CONTROL_REGISTER 0x500FF414
+// #define BACKGROUND_DATA_ADDRESS 0x50000000      // data size: uint8_t
+// #define LARGE_SPRITE_DATA_ADDRESS 0x500B4000    // data size: uint8_t
+// #define SMALL_SPRITE_DATA_ADDRESS 0x500F4000    // data size: uint8_t
+// #define BACKGROUND_PALLETE_ADDRESS 0x500FC000   // data size: uint32_t
+// #define SPRITE_PALLETE_ADDRESS 0x500FD000       // data size: uint32_t
+// #define TEXT_DATA_ADDRESS 0x500FE800            // data size: char
+// #define BACKGROUND_CONTROL_ADDRESS 0x500FF100   // data size: uint32_t
+// #define LARGE_SPRITE_CONTROL_ADDRESS 0x500FF114 // data size: uint32_t
+// #define SMALL_SPRITE_CONTROL_ADDRESS 0x500FF214 // data size: uint32_t
+// #define MODE_CONTROL_REGISTER 0x500FF414
 
-uint32_t SystemCall(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5);
+// uint32_t SystemCall(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5);
 
 // Video Controls
 int setVideoMode(int mode);

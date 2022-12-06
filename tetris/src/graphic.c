@@ -10,14 +10,14 @@ int down_sprite_count = 0;
 int setVideoMode(int mode) {
 	if(!(mode == 0 || mode == 1)) return -1;
 
-	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
+	uint32_t *VIDEO_MODE = (volatile uint32_t *)(getMODE_CONTROL_REGISTER());
 	VIDEO_MODE[0] &= ~(0x1);
 	VIDEO_MODE[0] |= mode;
 	return 1;
 }
 
 void setRefreshRate(uint8_t rate) {
-	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
+	uint32_t *VIDEO_MODE = (volatile uint32_t *)(getMODE_CONTROL_REGISTER());
 	VIDEO_MODE[0] &= ~(0xFE);
 	VIDEO_MODE[0] |= (rate<<1);
 }
@@ -26,7 +26,9 @@ void setRefreshRate(uint8_t rate) {
 int setBackgroundPalette(uint8_t palette_num, uint32_t entry_num, uint32_t ARGB) {
 	if((palette_num > 3 || entry_num > 255)) return -1;
 
-	uint32_t *PALETTE = (volatile uint32_t *)(BACKGROUND_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
+	// uint32_t *PALETTE = (volatile uint32_t *)(getBACKGROUND_PALLETE_ADDRESS() + (0x400)*palette_num + (0x4)*entry_num);
+	uint32_t palette_num_test = palette_num;
+	uint32_t *PALETTE = (volatile uint32_t *)(getBACKGROUND_PALLETE_ADDRESS(palette_num_test, entry_num));
 	PALETTE[0] = ARGB;
 	return 1;
 }
@@ -39,7 +41,9 @@ int backgroundDrawRec(uint8_t background_num,
 	if(background_num < 0 || background_num > 3) return -1;
 
 	// set background data
-	uint8_t *DATA = (volatile uint8_t *)(BACKGROUND_DATA_ADDRESS + (0x24000)*background_num);
+	// uint8_t *DATA = (volatile uint8_t *)(getBACKGROUND_DATA_ADDRESS() + (0x24000)*background_num);
+	uint32_t background_num_test = background_num;
+	uint8_t *DATA = (volatile uint8_t *)(getBACKGROUND_DATA_ADDRESS(background_num_test));
 	for(int i = 0; i < h; i++){
 		for(int j = 0; j < w; j++){
 			DATA[(0x200)*(y+i) + (x+j)] = colorEntry;
@@ -55,7 +59,9 @@ int setBackgroundControl(uint8_t background_num, int32_t x, int32_t y, int32_t z
 	if(palette_num < 0 || palette_num > 3) return -1;
 	
 	// set background control
-	uint32_t *CONTROL = (volatile uint32_t *)(BACKGROUND_CONTROL_ADDRESS + (0x4)*background_num);
+	// uint32_t *CONTROL = (volatile uint32_t *)(getBACKGROUND_CONTROL_ADDRESS() + (0x4)*background_num);
+	uint32_t background_num_test = background_num;
+	uint32_t *CONTROL = (volatile uint32_t *)(getBACKGROUND_CONTROL_ADDRESS(background_num_test));
 	CONTROL[0] = ((z)<<22) | ((y+288)<<12) | ((x+512)<<2) | palette_num;
 	
 	return 1;
@@ -66,7 +72,9 @@ int changeBackgroundPalette(uint8_t background_num, uint8_t palette_num) {
 	if(background_num < 0 || background_num > 3) return -1;
 	if(palette_num < 0 || palette_num > 3) return -1;
 
-	uint32_t *CONTROL = (volatile uint32_t *)(BACKGROUND_CONTROL_ADDRESS + (0x4)*background_num);
+	// uint32_t *CONTROL = (volatile uint32_t *)(getBACKGROUND_CONTROL_ADDRESS() + (0x4)*background_num);
+	uint32_t background_num_test = background_num;
+	uint32_t *CONTROL = (volatile uint32_t *)(getBACKGROUND_CONTROL_ADDRESS(background_num_test));
 	CONTROL[0] &= 0xFFFFFFFC;
 	CONTROL[0] |= palette_num;
 
@@ -77,7 +85,9 @@ int changeBackgroundPalette(uint8_t background_num, uint8_t palette_num) {
 int setSpritePalette(uint8_t palette_num, uint32_t entry_num, uint32_t ARGB) {
 	if(palette_num > 3 || entry_num > 255) return -1;
 
-	uint32_t *PALETTE = (volatile uint32_t *)(SPRITE_PALLETE_ADDRESS + (0x400)*palette_num + (0x4)*entry_num);
+	// uint32_t *PALETTE = (volatile uint32_t *)(getSPRITE_PALLETE_ADDRESS() + (0x400)*palette_num + (0x4)*entry_num);
+	uint32_t palette_num_test = palette_num;
+	uint32_t *PALETTE = (volatile uint32_t *)(getSPRITE_PALLETE_ADDRESS(palette_num_test, entry_num));
 	PALETTE[0] = ARGB;
 	return 1;
 }
@@ -90,7 +100,9 @@ uint16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t p
 		num = small_sprite_count;
 
 		// set sprite data
-		uint8_t *DATA = (volatile uint8_t *)(SMALL_SPRITE_DATA_ADDRESS + (0x100)*small_sprite_count);
+		// uint8_t *DATA = (volatile uint8_t *)(getSMALL_SPRITE_DATA_ADDRESS() + (0x100)*small_sprite_count);
+		uint32_t small_sprite_count_test = small_sprite_count;
+		uint8_t *DATA = (volatile uint8_t *)(getSMALL_SPRITE_DATA_ADDRESS(small_sprite_count_test));
 		for(int i = 0; i < 16; i++){
 			for(int j = 0; j < 16; j++){
 				DATA[(i<<6) + j] = (i<h && j<w) ? colorEntry : 0;
@@ -98,7 +110,9 @@ uint16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t p
     	}
 
 		// set sprite control
-		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*small_sprite_count);
+		// uint32_t *CONTROL = (volatile uint32_t *)(getSMALL_SPRITE_CONTROL_ADDRESS() + (0x4)*small_sprite_count);
+		// uint32_t small_sprite_count_test = small_sprite_count;
+		uint32_t *CONTROL = (volatile uint32_t *)(getSMALL_SPRITE_CONTROL_ADDRESS(small_sprite_count_test));
 		CONTROL[0] = calcSmallSpriteControl(x, y, 0, w, h, palette_num);
 
 		small_sprite_count++;
@@ -108,7 +122,9 @@ uint16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t p
 		num = 128 + large_sprite_count;
 
 		// set sprite data
-		uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*large_sprite_count);
+		// uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS() + (0x1000)*large_sprite_count);
+		uint32_t large_sprite_count_test = large_sprite_count;
+		uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(large_sprite_count_test));
 		for(int i = 0; i < 64; i++){
 			for(int j = 0; j < 64; j++){
 				DATA[(i<<6) + j] = (i<h && j<w) ? colorEntry : 0;
@@ -116,7 +132,9 @@ uint16_t createRecSprite(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t p
 		}
 
 		// set sprite control
-		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*large_sprite_count);
+		// uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*large_sprite_count);
+		// uint32_t large_sprite_count_test = large_sprite_count;
+		uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
 		CONTROL[0] = calcLargeSpriteControl(x, y, w, h, palette_num);
 
 		large_sprite_count++;
@@ -133,7 +151,9 @@ int moveSprite(uint16_t sprite_num, uint32_t d_x, uint32_t d_y) {
 	uint32_t x, y;
 
 	if (sprite_num < 128 ) { // small sprite
-		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*sprite_num);
+		// uint32_t *CONTROL = (volatile uint32_t *)(getSMALL_SPRITE_CONTROL_ADDRESS() + (0x4)*sprite_num);
+		uint32_t small_sprite_count_test = sprite_num;
+		uint32_t *CONTROL = (volatile uint32_t *)(getSMALL_SPRITE_CONTROL_ADDRESS(small_sprite_count_test));
 		x = (CONTROL[0] & 0x7FE) >> 2;
 		y = (CONTROL[0] & 0x1FF000) >> 12;
 
@@ -145,7 +165,9 @@ int moveSprite(uint16_t sprite_num, uint32_t d_x, uint32_t d_y) {
 		CONTROL[0] |= (y<<12);
 	}
 	else { // large sprite
-		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(sprite_num - 128));
+		// uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*(sprite_num - 128));
+		uint32_t large_sprite_count_test = sprite_num - 128;
+		uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
 		x = (CONTROL[0] & 0x7FE) >> 2;
 		y = (CONTROL[0] & 0x1FF000) >> 12;
 
@@ -165,13 +187,17 @@ int changeSpritePalette(uint16_t sprite_num, uint8_t palette_num) {
 	if(palette_num < 0 || palette_num > 3) return -1;
 
 	if (sprite_num < 128 ) { // small sprite
-		uint32_t *CONTROL = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + (0x4)*sprite_num);
+		// uint32_t *CONTROL = (volatile uint32_t *)(getSMALL_SPRITE_CONTROL_ADDRESS() + (0x4)*sprite_num);
+		uint32_t small_sprite_count_test = sprite_num;
+		uint32_t *CONTROL = (volatile uint32_t *)(getSMALL_SPRITE_CONTROL_ADDRESS(small_sprite_count_test));
 		CONTROL[0] &= 0xFFFFFFFC;
 		CONTROL[0] |= palette_num;
 	}
 	else { // large sprite
 		uint32_t num = sprite_num - 128;
-		uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*num);
+		// uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*num);
+		uint32_t large_sprite_count_test = num;
+		uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
 		CONTROL[0] &= 0xFFFFFFFC;
 		CONTROL[0] |= palette_num;
 	}
@@ -194,7 +220,7 @@ int drawText(char* text, uint32_t length, int32_t x, int32_t y) {
 	// ranges: x = 0~63; y = 0~35
 	if(x >= 64 || y >= 36) return -1; // position out of range
 
-	char *TEXT_DATA = (volatile char *)(TEXT_DATA_ADDRESS);
+	char *TEXT_DATA = (volatile char *)(getTEXT_DATA_ADDRESS());
 	for(int i = 0; i < length; i++) {
 		int index = y*(0x40) + x + i;
 
@@ -208,7 +234,7 @@ int drawText(char* text, uint32_t length, int32_t x, int32_t y) {
 
 
 void clearTextScreen() {
-	char *TEXT_DATA = (volatile char *)(TEXT_DATA_ADDRESS);
+	char *TEXT_DATA = (volatile char *)(getTEXT_DATA_ADDRESS());
 	for(int i = 0; i < 0x900; i++) {
 		TEXT_DATA[i] = 0;
 	}

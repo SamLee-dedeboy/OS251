@@ -410,7 +410,8 @@ void drop_block_state(int32_t block_type, int *rotation) {
 
 
 void delete_full_line_state() {
-    uint8_t *DATA = (volatile uint8_t *)(BACKGROUND_DATA_ADDRESS + (0x24000)*1); // background_num = 1
+    // uint8_t *DATA = (volatile uint8_t *)(getBACKGROUND_DATA_ADDRESS() + (0x24000)*1); // background_num = 1
+	uint8_t *DATA = (volatile uint8_t *)(getBACKGROUND_DATA_ADDRESS(1));
     
     // game board
     int k = 0;
@@ -456,7 +457,9 @@ void delete_full_line_state() {
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 
     // set sprite data
-    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
+    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS() + (0x1000)*(block_type));
+    uint32_t block_type_test = block_type;
+    uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(block_type_test));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -480,7 +483,9 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
     }
 
     // set sprite control
-    uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*block_type);
+    // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
+    uint32_t large_sprite_count_test = block_type;
+    uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
     CONTROL[0] = calcLargeSpriteControl(x, 0, BLOCK_SIZE, BLOCK_SIZE, 1); // use transparent palette at initialization
 
 	return block_type + 128;
@@ -490,7 +495,9 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 void rotateBlock(uint8_t block_type, uint8_t rotation) {
 	// uint8_t block_type = sprite_num - 128;
 	// set sprite data
-    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
+    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS() + (0x1000)*(block_type));
+    uint32_t block_type_test = block_type;
+    uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(block_type_test));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -518,7 +525,9 @@ void rotateBlock(uint8_t block_type, uint8_t rotation) {
 
 void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num) {
 	// set large sprite control
-    uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*block_type);
+    // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
+    uint32_t large_sprite_count_test = block_type;
+    uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
     CONTROL[0] = calcLargeSpriteControl(x, y, BLOCK_SIZE, BLOCK_SIZE, palette_num); // use transparent palette at initialization
 
 	return;
