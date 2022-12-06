@@ -83,5 +83,5 @@ Graphics utility functions are implemented and listed in `graphic.h`
 - `*rand()`: generates random numbers.
 - multithreading api not merged yet
 
-Note: the `*` apis are not tested yet. Prepare to face chaos when using them.  <!--- by some dude who needs a drink -->
+Note: the `*` apis are not tested yet. Prepare to face chaos when using them.  <!--- by some dude who needs a drink --> <!--- dude you already had a drink yesterday -->
 
