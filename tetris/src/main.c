@@ -6,6 +6,8 @@
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile int global = 42;
+volatile int videoInt = 0;
+volatile int last_videoInt;
 volatile uint32_t controller_status = 0;
 
 int prev_game_unit = -1;
@@ -38,11 +40,32 @@ int block_current_y_idx = 0; // index relative to game_board
 
 int init_x_pos;
 volatile int x_pos;
+int border_color = 0;
+
+uint32_t Thread_video_interrupt(void *param)
+{
+    last_videoInt = videoInt;
+    while (1)
+    {
+        videoInt = systemcall(SYSIDEO, 0, 0, 0, 0, 0);
+        if (videoInt != last_videoInt)
+        {
+            border_color = (border_color == 0)? 2 : 0;
+            setBackgroundPalette(2, 1, Rand_sys()); // random color
+            setBackgroundControl(0, merge_arg(0, 0), 5, border_color); // change border color upon video interrupt
+            last_videoInt = videoInt;
+        }
+    }
+}
 
 int main()
 {
     // (*INT_ENABLE_REG) = 0x3; // disable cmd interrupt
+    void *param;
+    thread_init(THREAD_INITIALLIZE, Thread_video_interrupt, param);
+
     int last_global = global;
+    int last_videoInt = videoInt;
     int mode;
 
     // -------Draw Welcome Page--------------
@@ -69,6 +92,10 @@ int main()
     setBackgroundPalette(0, 0, 0x00000000); // Transparent
     setBackgroundPalette(0, 1, 0xFFFFFFFF); // White
     setBackgroundPalette(0, 2, 0xFF000000); // Black
+
+    setBackgroundPalette(2, 0, 0x00000000); // Transparent
+    setBackgroundPalette(2, 1, 0xFFFF99CC); // Pink
+    setBackgroundPalette(2, 2, 0xFF000000); // Black
 
     // -----------end set grid palette-------------
 
@@ -117,7 +144,8 @@ int main()
 
     while (1)
     {
-        global = systemcall(SYSIDEO, 0, 0, 0, 0, 0); // getTimer();
+        // global = systemcall(SYSIDEO, 0, 0, 0, 0, 0); // getTimer();
+        global = getTimer();
         if (global != last_global)
         {
             // int video;
@@ -254,6 +282,13 @@ int main()
             }
             last_global = global;
         }
+        
+        // videoInt = systemcall(SYSIDEO, 0, 0, 0, 0, 0);
+        // if(videoInt != last_videoInt) {
+        //     border_color = (border_color == 0)? 2 : 0;
+        //     setBackgroundPalette(2, 1, Rand_sys()); // random color
+        //     setBackgroundControl(0, merge_arg(0, 0), 5, border_color); // change border color upon video interrupt
+        // }
     }
     return 0;
 }
@@ -372,7 +407,7 @@ void init_game_state(int *rotation)
         backgroundDrawRec(0, merge_arg(MARGIN * UNIT - UNIT, 0), merge_arg(UNIT, FULL_Y), 1);               // left boarder
         backgroundDrawRec(0, merge_arg(FULL_X - (MARGIN * UNIT), 0), merge_arg(UNIT, FULL_Y), 1);           // right boarder
 
-        setBackgroundControl(0, merge_arg(0, 0), 5, 0); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
+        setBackgroundControl(0, merge_arg(0, 0), 5, border_color); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
         // -----------end draw grid---------------
 
         // -----------draw blocks-------------
