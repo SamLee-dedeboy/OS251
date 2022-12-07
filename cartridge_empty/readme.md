@@ -1,7 +1,7 @@
 Sample usage of our API is demonstrated inside `main.c`
 ## Graphics APIs
 Graphics utility functions are listed in `graphic.h`
-🔥Note: some functions requires the arguments to be merged by `ab = merge_arg(a, b)` before assigning to the funtion in order to reduce the number of parameters.
+🔥Note: some functions requires the arguments to be merged by `ab = merge_arg(a, b)` before assigning to the function in order to reduce the number of parameters.
 
 ### Video controls
  - `int setVideoMode(int mode)`
@@ -10,7 +10,7 @@ Graphics utility functions are listed in `graphic.h`
 
  - `void setRefreshRate(uint8_t rate)`
     - Changes the refresh rate of the screen.
-    - ⚠️A bug appears when setting the refrsh value to oher than default 0, cannot move sprites
+    - ⚠️A bug appears when setting the refresh value to other than default 0, cannot move sprites
 
 ### Backgrounds
  - `int setBackgroundPalette(uint8_t palette_num, uint32_t entry_num, uint32_t ARGB)`
@@ -41,9 +41,9 @@ Graphics utility functions are listed in `graphic.h`
 
  - 🔥`uint16_t createRecSprite(uint32_t xy, uint32_t wh, uint8_t palette_num, uint8_t colorEntry)`
     - Creates a rectangular sprite of specified width and height at the desired position.
-    - If the input width and height are both smaller than 16, then a small sprite will be created; otherwise creats a larges sprite.
-    - If total number of small sprites exeed 128, then the first small sprite will be overwritten.
-    - If total number of large sprites exeed 64, then the first large sprite will be overwritten.
+    - If the input width and height are both smaller than 16, then a small sprite will be created; otherwise creates a larges sprite.
+    - If total number of small sprites exceeds 128, then the first small sprite will be overwritten.
+    - If total number of large sprites exceeds 64, then the first large sprite will be overwritten.
     - Color(entry_num) outside specified width and height will be set to 0. So we recommend setting the 0 entry of the palette to transparent for desired rectangle.
     - Returns a unique sprite index. Numbers 0 to 127 are small sprites, 128 to 191 are large sprites.
 
@@ -86,16 +86,15 @@ Graphics utility functions are listed in `graphic.h`
 
 
 ## System call APIs
-- `getTimer`: returns a value that is increased upon every iterrupt. Value rounds back to 0 when it reaches 999.
+- `getTimer`: returns a value that is increased upon every interrupt. Value rounds back to 0 when it reaches 999.
 - `getMode`: get current video mode
 - `getStatus`: get controller status
-- 🔥`enableCMD`: enable CMD button
-- 🔥`disableCMD`: disable CMD button
-- spriteDrop()
+- `enableCMD`: enable CMD button
+- `disableCMD`: disable CMD button
 - `*getMachinePeriod`: reads `Machine Clock Period Register`.
 - `*getMachineTime`: reads `Machine Time (mtime)`.
 - `*getIntPendingReg`: reads `Interrupt Pending Flag`.
-- `*Rand_sys()`: generates random numbers. ('_sys' to avoid nameing conflict with stdlib 'Rand()' function)
+- `*Rand_sys()`: generates random numbers. ('_sys' to avoid naming conflict with stdlib 'Rand()' function)
 - `thread_init()`: initializes a thread to run specified function.
    - Sample usage in `thread_sample.c`. To run this file please change `main.o` in the Makefile to `thread_sample.o` to build the binary. 
 - `printtext()`: print out text to screen when OS was in text mode.
