@@ -2,12 +2,14 @@
 #include <stdbool.h>
 // #include "api.h"
 // #include "systemcall.h"
-// #include "tetris.h"
+#include "tetris.h"
 #include "tmp.h"
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile int global = 42;
+volatile int dup_global = 42;
+volatile int last_char = 0;
 volatile uint32_t controller_status = 0;
 
 int prev_game_unit = -1;
@@ -87,6 +89,7 @@ int main()
 
     backgroundDrawRec(1, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 8); // fill with tranparent first
     setBackgroundControl(1, merge_xy(0, 0), 0, 1);
+	// controlBackground(1, 0, 0, 0, 1);
     // -----------end set gameboard-------------
 
 
@@ -118,10 +121,11 @@ int main()
 
     game_state = WELCOME_PAGE_STATE;
     setVideoMode(TEXT_MODE);
+	// setDisplayMode(TEXT_MODE);
 
     while (1)
     {
-        global =  getTimer();
+        global = getTicks();
         if(global != last_global) {
 
             mode = getMode();
@@ -225,6 +229,7 @@ int main()
 
                     //clear gameboard background
                     setVideoMode(TEXT_MODE);
+                    // setDisplayMode(TEXT_MODE);
                     backgroundDrawRec(1, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 8); // fill with tranparent
                     game_state = WELCOME_PAGE_STATE;
                 }
@@ -319,11 +324,17 @@ void init_game_state(int *rotation) {
         // --------end set units------------
 
         // -----------Draw grid-------------
+
+        //
+        // ------ start: comment everything in between and it'll work ------ 
+        //
+
         backgroundDrawRec(0, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 0); // fill with transparent first
 
         for(int i = 0; i < FULL_X; i += UNIT) {
             backgroundDrawRec(0, merge_xy(i, 0), merge_xy(1, FULL_Y), 2); // vertical lines
         }
+
         for(int j = 0; j < FULL_Y; j += UNIT) {
             backgroundDrawRec(0, merge_xy(0, j), merge_xy(FULL_X, 1), 2); // horizontal lines
         }
@@ -339,9 +350,11 @@ void init_game_state(int *rotation) {
         backgroundDrawRec(0, merge_xy(FULL_X - (MARGIN*UNIT), 0), merge_xy(UNIT, FULL_Y), 1); // right boarder
 
         setBackgroundControl(0, merge_xy(0, 0), 5, 0); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
+
         // -----------end draw grid---------------
 
 
+        
         // -----------draw blocks-------------
         initBlock(S_type, *rotation, FULL_X/2-2*UNIT);
         initBlock(I_type, *rotation, FULL_X/2-2*UNIT);
@@ -349,6 +362,11 @@ void init_game_state(int *rotation) {
         initBlock(L_type, *rotation, FULL_X/2-2*UNIT);
         initBlock(O_type, *rotation, FULL_X/2-2*UNIT);
         initBlock(T_type, *rotation, FULL_X/2-2*UNIT);
+
+        //
+        // ------ end: comment everything in between and it'll work ------ 
+        //
+
         initBlock(Z_type, *rotation, FULL_X/2-2*UNIT);
         // -----------end draw blocks-----------
 
@@ -357,6 +375,7 @@ void init_game_state(int *rotation) {
 
     game_state = CREATE_BLOCK_STATE;
     setVideoMode(GRAPHICS_MODE);
+	// setDisplayMode(GRAPHICS_MODE);
     return;
 }
 

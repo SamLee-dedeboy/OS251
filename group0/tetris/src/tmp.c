@@ -1,25 +1,20 @@
 #include "tmp.h"
 
 // ------- replaced apis start --------
-int setBackgroundControl(uint32_t background_num, uint32_t xy, uint32_t z, uint32_t palette_num) {
-	uint32_t x = unmerge(xy, 0);
-	uint32_t y = unmerge(xy, 1);
-	controlBackground(background_num, x, y, z, palette_num);
-	return 1;
-}
+// int setBackgroundControl(uint32_t background_num, uint32_t xy, uint32_t z, uint32_t palette_num) {
+// 	uint32_t x = unmerge(xy, 0);
+// 	uint32_t y = unmerge(xy, 1);
+// 	controlBackground(background_num, x, y, z, palette_num);
+// 	return 1;
+// }
 
-int setVideoMode(uint32_t mode) {
-	setDisplayMode(mode);
-	return 1;
-}
-
-uint32_t getTimer() {
-	return (uint32_t)getTicks();
-}
+// int setVideoMode(uint32_t mode) {
+// 	setDisplayMode(mode);
+// 	return 1;
+// }
 
 
 // ------- replaced apis end --------
-
 int drawText(char* text, uint32_t length, uint32_t x, uint32_t y) {
 	// ranges: x = 0~63; y = 0~35
 	if(x >= 64 || y >= 36) return -1; // position out of range
@@ -73,7 +68,7 @@ int setSpritePalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB) {
 	return 1;
 }
 
-int getMode() {
+uint32_t getMode() {
 	if (MODE_CONTROL & 1)
 	{
 		return 1;
@@ -138,7 +133,7 @@ uint32_t getBACKGROUND_DATA_ADDRESS(uint32_t background_num) {
 }
 
 uint32_t merge_xy(uint32_t x, uint32_t y) {
-	return (x<<16) | y;
+	return (x<<16) | (y);
 }
 
 uint32_t unmerge(uint32_t xy, int flag) {
@@ -147,4 +142,27 @@ uint32_t unmerge(uint32_t xy, int flag) {
 	} else { // return y
 		return  (xy << 16) >> 16;
 	}
+}
+
+int setBackgroundControl(uint32_t background_num, uint32_t xy, uint32_t z, uint32_t palette_num) {
+	if(background_num < 0 || background_num > 3) return -1;
+	if(palette_num < 0 || palette_num > 3) return -1;
+	
+	int32_t x = xy>>16 & (0x0000FFFF);
+	int32_t y = xy & (0x0000FFFF);
+
+	// set background control
+	uint32_t *CONTROL = (volatile uint32_t *)(BACKGROUND_CONTROL_ADDRESS + (0x4)*background_num);
+	CONTROL[0] = ((z)<<22) | ((y+288)<<12) | ((x+512)<<2) | palette_num;
+	
+	return 1;
+}
+
+int setVideoMode(uint32_t mode) {
+	if(!(mode == 0 || mode == 1)) return -1;
+
+	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
+	VIDEO_MODE[0] &= ~(0x1);
+	VIDEO_MODE[0] |= mode;
+	return 1;
 }
