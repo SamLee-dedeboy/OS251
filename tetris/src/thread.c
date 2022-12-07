@@ -6,6 +6,7 @@
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 int test_num = 0;
+int video = 0, lastvideo = 0;
 
 uint32_t Thread(void *param)
 {
@@ -17,6 +18,20 @@ uint32_t Thread(void *param)
     }
 }
 
+uint32_t Thread_video_interrupt(void *param)
+{
+    while (1)
+    {
+        video = systemcall(SYSIDEO, 0, 0, 0, 0, 0);
+        if (video != lastvideo)
+        {
+            lastvideo = video;
+            printtext(WRITE_TEXT, "video      %d\n", video);
+        }
+    }
+}
+// video = systemcall(SYSIDEO, 0, 0, 0, 0, 0);
+// printtext
 int main()
 {
     void *param;
