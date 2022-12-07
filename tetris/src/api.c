@@ -36,10 +36,13 @@ uint32_t getBACKGROUND_DATA_ADDRESS(uint32_t background_num)
 {
     return systemcall(get_BACKGROUND_DATA_ADDRESS, background_num, 0, 0, 0, 0);
 }
-uint32_t getSPRITE_DATA_ADDRESS(uint32_t sprite_num)
+uint32_t getLARGE_SPRITE_DATA_ADDRESS(uint32_t large_sprite_count)
 {
-    if (sprite_num < 128 ) return systemcall(get_SMALL_SPRITE_DATA_ADDRESS, sprite_num, 0, 0, 0, 0);
-    else return systemcall(get_LARGE_SPRITE_DATA_ADDRESS, sprite_num-128, 0, 0, 0, 0);
+    return systemcall(get_LARGE_SPRITE_DATA_ADDRESS, large_sprite_count, 0, 0, 0, 0);
+}
+uint32_t getSMALL_SPRITE_DATA_ADDRESS(uint32_t small_sprite_count)
+{
+    systemcall(get_SMALL_SPRITE_DATA_ADDRESS, small_sprite_count, 0, 0, 0, 0);
 }
 uint32_t getBACKGROUND_PALLETE_ADDRESS(uint32_t palette_num, uint32_t entry_num) 
 {
@@ -57,10 +60,13 @@ uint32_t getBACKGROUND_CONTROL_ADDRESS(uint32_t background_num)
 {
     return systemcall(get_BACKGROUND_CONTROL_ADDRESS, background_num, 0, 0, 0, 0);
 }
-uint32_t getSPRITE_CONTROL_ADDRESS(uint32_t sprite_num)
+uint32_t getLARGE_SPRITE_CONTROL_ADDRESS(uint32_t large_sprite_count)
 {
-    if (sprite_num < 128 ) return systemcall(get_SMALL_SPRITE_DATA_ADDRESS, sprite_num, 0, 0, 0, 0);
-    else return systemcall(get_LARGE_SPRITE_DATA_ADDRESS, sprite_num-128, 0, 0, 0, 0);
+    return systemcall(get_LARGE_SPRITE_CONTROL_ADDRESS, large_sprite_count, 0, 0, 0, 0);
+}
+uint32_t getSMALL_SPRITE_CONTROL_ADDRESS(uint32_t small_sprite_count)
+{
+    return systemcall(get_SMALL_SPRITE_CONTROL_ADDRESS, small_sprite_count, 0, 0, 0, 0);
 }
 uint32_t getMODE_CONTROL_REGISTER() 
 {

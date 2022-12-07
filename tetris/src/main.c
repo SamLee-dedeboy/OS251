@@ -456,8 +456,7 @@ void delete_full_line_state() {
 
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 
-    uint32_t sprite_num = block_type + 128;
-    uint8_t *DATA = (volatile uint8_t *)(getSPRITE_DATA_ADDRESS(sprite_num));
+    uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(block_type));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -482,8 +481,7 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 
     // set sprite control
     // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
-    // uint32_t sprite_num = block_type + 128;
-    uint32_t *CONTROL = (volatile uint32_t *)(getSPRITE_CONTROL_ADDRESS(sprite_num));
+    uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(block_type));
     CONTROL[0] = calcLargeSpriteControl(merge_arg(x, 0), merge_arg(BLOCK_SIZE, BLOCK_SIZE), 1); // use transparent palette at initialization
 
 	return block_type + 128;
@@ -491,8 +489,8 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 
 
 void rotateBlock(uint8_t block_type, uint8_t rotation) {
-    uint32_t sprite_num = block_type + 128;
-    uint8_t *DATA = (volatile uint8_t *)(getSPRITE_DATA_ADDRESS(sprite_num));
+    // uint32_t sprite_num = block_type + 128;
+    uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(block_type));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -521,8 +519,8 @@ void rotateBlock(uint8_t block_type, uint8_t rotation) {
 void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num) {
 	// set large sprite control
     // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
-    uint32_t sprite_num = block_type + 128;
-    uint32_t *CONTROL = (volatile uint32_t *)(getSPRITE_CONTROL_ADDRESS(sprite_num));
+    // uint32_t sprite_num = block_type + 128;
+    uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(block_type));
     CONTROL[0] = calcLargeSpriteControl(merge_arg(x, y), merge_arg(BLOCK_SIZE, BLOCK_SIZE), palette_num); // use transparent palette at initialization
 
 	return;

@@ -3,10 +3,10 @@
 #include <stdint.h>
 #endif
 
-#ifndef GRAPHIC_H
-#define GRAPHIC_H
-#include "graphic.h"
-#endif
+// #ifndef GRAPHIC_H
+// #define GRAPHIC_H
+// #include "graphic.h"
+// #endif
 
 // ---------Definitions for tetris game-----------
 
