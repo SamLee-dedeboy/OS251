@@ -39,12 +39,7 @@
 #define BACKGROUND_DATA_ADDRESS 0x50000000      // data size: uint8_t
 #define LARGE_SPRITE_DATA_ADDRESS 0x500B4000    // data size: uint8_t
 #define SMALL_SPRITE_DATA_ADDRESS 0x500F4000    // data size: uint8_t
-#define BACKGROUND_PALLETE_ADDRESS 0x500FC000   // data size: uint32_t
-#define SPRITE_PALLETE_ADDRESS 0x500FD000       // data size: uint32_t
 #define TEXT_DATA_ADDRESS 0x500FE800            // data size: char
-#define BACKGROUND_CONTROL_ADDRESS 0x500FF100   // data size: uint32_t
-#define LARGE_SPRITE_CONTROL_ADDRESS 0x500FF114 // data size: uint32_t
-#define SMALL_SPRITE_CONTROL_ADDRESS 0x500FF214 // data size: uint32_t
 #define MODE_CONTROL_REGISTER 0x500FF414
 #define MODE_CONTROL (*((volatile uint32_t *)0x500FF414))
 
@@ -54,11 +49,13 @@ void init_game_state(int *rotation);
 void drop_block_state(int32_t sprite_num, int *rotation);
 void delete_full_line_state();
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x);
+int initDigit(int digit_type, int32_t x, int32_t y);
+int initTextRect(int rect_id, int32_t x, int32_t y);
 void rotateBlock(uint8_t block_type, uint8_t rotation);
 bool checkCollide_X(int32_t d_x);
 bool checkCollide_Y();
 
-// ---------Functions complement other groups' missing APIs-----------
+// ---------Functions complement group_2's missing APIs-----------
 uint32_t getMode();
 
 // Video Controls
@@ -76,7 +73,7 @@ int drawText(char* text, uint32_t length, uint32_t x, uint32_t y);
 
 // replaced by group_2 APIs.
 // group_2: setLargeSpriteControl(block_type, calcLargeSpriteControl(x, y, BLOCK_SIZE, BLOCK_SIZE, palette_num)) (group_2 API)
-// ours:    void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num);
+// ours:    setDigitControl, void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num);
 // group_2: setTextMode(), setGraphicsMode()
 // ours:    int setVideoMode(uint32_t mode)
 // group_2: setBackgroundColor

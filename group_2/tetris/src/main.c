@@ -21,6 +21,133 @@ uint8_t Block[7][4][4] = {
     {{0, 1, 5, 6}, {2, 5, 6, 9}, {4, 5, 9, 10}, {1, 4, 5, 8}} 		// Z_type
 };
 
+int score = 0;
+int total_full_line = 0;
+
+uint8_t Digit[10][64] = {
+    { 1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 0
+
+    { 0, 0, 1, 1, 0, 0, 0, 0, 
+      0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0, 0, 0, 
+      0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0, 0, 0, 
+      0, 0, 1, 1, 0, 0, 0, 0 },      // 1
+    
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 0, 0, 0, 0, 
+      1, 1, 0, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 2
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 3
+
+    { 1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0 },      // 4
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 0, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 5
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 0, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 6
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0 },      // 7
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 8
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0 }      // 9
+};
+
+uint8_t Score_text[5][25] = {
+    { 0, 1, 1, 1, 1, 
+      1, 0, 0, 0, 0, 
+      0, 1, 1, 1, 0, 
+      0, 0, 0, 0, 1, 
+      1, 1, 1, 1, 0 },      // S
+
+    { 0, 1, 1, 1, 1, 
+      1, 0, 0, 0, 0, 
+      1, 0, 0, 0, 0, 
+      1, 0, 0, 0, 0, 
+      0, 1, 1, 1, 1 },      // C
+
+    { 0, 1, 1, 1, 0, 
+      1, 0, 0, 0, 1, 
+      1, 0, 0, 0, 1, 
+      1, 0, 0, 0, 1, 
+      0, 1, 1, 1, 0 },      // O
+
+    { 0, 1, 1, 1, 0, 
+      1, 0, 0, 0, 1, 
+      1, 1, 1, 1, 1, 
+      1, 0, 0, 1, 0, 
+      1, 0, 0, 0, 1 },      // R
+
+    { 1, 1, 1, 1, 1, 
+      1, 0, 0, 0, 0, 
+      1, 1, 1, 1, 1, 
+      1, 0, 0, 0, 0, 
+      1, 1, 1, 1, 1 },      // E
+};
+
 int UNIT;       // 16 pixels or 8 pixels
 int BLOCK_SIZE; // a block consists of 4UNIT * 4UNIT
 int MARGIN;     // how many amount of UNIT
@@ -118,6 +245,17 @@ int main()
     int next_block_type = 1;
     // -----------end init block palettes-------------
 
+    // ---------set digit palettes---------------
+    // color palatte_num = 2 for digits
+    setColor(2, 0, 0xFFFFFFFF); // White
+    setColor(2, 8, 0x00000000); // Transparent
+
+    // transparent palette_num = 3 for digits
+    setColor(3, 0, 0x00000000);
+    setColor(3, 8, 0x00000000);
+
+    // -----------end init digit palettes-------------
+
     game_state = WELCOME_PAGE_STATE;
     setTextMode();
 
@@ -154,6 +292,10 @@ int main()
                     // visualize next blockgame_board
                     setLargeSpriteControl(next_block_type, calcLargeSpriteControl((MARGIN/2)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 0));
 
+                    // visualize 2-digit score
+                    setLargeSpriteControl((score%100)/10+20, calcLargeSpriteControl(FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 2));
+                    setLargeSpriteControl(score%10+10, calcLargeSpriteControl(FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 2));
+    
                     // reset moving block info
                     block_current_x_idx = game_board_width/2 - 2; // the middle of the game_board
                     block_current_y_idx = 0;
@@ -213,6 +355,22 @@ int main()
                         //no deletion needed
                     }
                     else {
+                        total_full_line += full_line_count;
+
+                        // clear 2-digit score
+                        // setDigitControl((score%100)/10+10, FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, 3);
+                        // setDigitControl(score%10, FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, 3);
+                        setLargeSpriteControl((score%100)/10+20, calcLargeSpriteControl(FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 3));
+                        setLargeSpriteControl(score%10+10, calcLargeSpriteControl(FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 3));
+    
+                        // draw 2-digit score
+                        // setDigitControl((total_full_line%100)/10+10, FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, 2);
+                        // setDigitControl(total_full_line%10, FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, 2);
+                        setLargeSpriteControl((total_full_line%100)/10+20, calcLargeSpriteControl(FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 2));
+                        setLargeSpriteControl(total_full_line%10+10, calcLargeSpriteControl(FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 2));
+    
+                        score = total_full_line;
+
                         delete_full_line_state();
                     }
 
@@ -262,6 +420,14 @@ void welcome_page_state() {
 
             // switch to game
             game_state = INIT_GAME_STATE;
+            // clear 2-digit score
+            // setDigitControl((score%100)/10+10, FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, 3);
+            // setDigitControl(score%10, FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, 3);
+            setLargeSpriteControl((score%100)/10+20, calcLargeSpriteControl(FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 3));
+            setLargeSpriteControl(score%10+10, calcLargeSpriteControl(FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 3));
+    
+            total_full_line = 0;
+            score = 0;
             return;
         }
 
@@ -355,6 +521,46 @@ void init_game_state(int *rotation) {
         initBlock(T_type, *rotation, FULL_X/2-2*UNIT);
         initBlock(Z_type, *rotation, FULL_X/2-2*UNIT);
         // -----------end draw blocks-----------
+
+        // -----------draw digits (for 2-digit score)-------------
+        initDigit(0, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(1, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(2, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(3, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(4, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(5, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(6, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(7, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(8, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(9, FULL_X-MARGIN*UNIT, FULL_Y/3);
+
+        initDigit(10, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(11, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(12, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(13, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(14, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(15, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(16, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(17, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(18, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(19, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        // -----------end draw digits (for 2-digit score-----------
+
+        // -----------draw score text-----------
+        // draw score text pixel. (5rect by 5rect) (1rect is 3pix by 3pix)
+        int UNIT_text = 3;
+        int32_t rect_start_x = FULL_X-(MARGIN-2)*UNIT + 1;
+        int32_t rect_start_y = UNIT*3 + 1;
+        for (int rect_id=0; rect_id<5; rect_id++) {
+            for (int rect_tmp=0; rect_tmp<25; rect_tmp++) {
+                if (Score_text[rect_id][rect_tmp] == 1) {
+                    initTextRect(rect_id*25+rect_tmp, rect_start_x + UNIT_text*(rect_tmp%5)+16*rect_id, rect_start_y+UNIT_text*(rect_tmp/5));
+                }
+
+            }
+        }
+        // -----------end draw score text-----------
+
 
         prev_game_unit = current_game_unit;
     }
@@ -488,6 +694,73 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
     setLargeSpriteControl(block_type, calcLargeSpriteControl(x, 0, BLOCK_SIZE, BLOCK_SIZE, 1));
 
 	return block_type + 128;
+}
+
+int initDigit(int digit_type, int32_t x, int32_t y) {
+    // set small sprite data
+    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS() + (0x1000)*(block_type));
+    uint32_t digit_type_test = digit_type + 10;
+    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(digit_type_test));
+
+    // clear to transparent
+    for(int i = 0; i < 64; i++){
+        for(int j = 0; j < 64; j++){
+            DATA[(i<<6) + j] = 8;
+        }
+    }
+
+    int sub_block;
+    int start_x, start_y;
+    int UNIT_tmp = UNIT/2;
+    for(int k = 0; k < 64; k++) {
+        if (Digit[digit_type%10][k] == 1) {
+            sub_block = k;
+            start_x = (sub_block % 8)*UNIT_tmp;
+            start_y = (sub_block / 8)*UNIT_tmp;
+
+            for(int i = 0; i < UNIT_tmp; i++) {
+                for(int j = 0; j < UNIT_tmp; j++) {
+                    DATA[((start_y+i)<<6) + (start_x+j)] = 0;
+                }
+            }
+        }
+        // sub_block = Block[block_type][rotation][k];
+        // start_x = (sub_block % 4)*UNIT;
+        // start_y = (sub_block / 4)*UNIT;
+
+        // for(int i = 0; i < UNIT; i++) {
+        //     for(int j = 0; j < UNIT; j++) {
+        //         DATA[((start_y+i)<<6) + (start_x+j)] = block_type;
+        //     }
+        // }
+    }
+
+    // set small sprite control
+    // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
+    uint32_t large_sprite_count_test = digit_type + 10;
+    setLargeSpriteControl(large_sprite_count_test, calcLargeSpriteControl(x, y, BLOCK_SIZE, BLOCK_SIZE, 3));
+
+	return digit_type + 128 + 10;
+}
+
+int initTextRect(int rect_id, int32_t x, int32_t y) {
+    // set small sprite data
+    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS() + (0x1000)*(block_type));
+    // uint32_t digit_type_test = digit_type + 30;
+    uint8_t *DATA = (volatile uint8_t *)(SMALL_SPRITE_DATA_ADDRESS + (0x100)*rect_id);
+
+    int UNIT_tmp = 3;
+    for(int i = 0; i < UNIT_tmp; i++) {
+        for(int j = 0; j < UNIT_tmp; j++) {
+            DATA[((y+i)<<6) + (x+j)] = 0;
+        }
+    }
+
+    // set small sprite control
+    // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
+    setSmallSpriteControl(rect_id, calcSmallSpriteControl(x, y, 3, 3, 2));
+
+	return rect_id;
 }
 
 void rotateBlock(uint8_t block_type, uint8_t rotation) {
