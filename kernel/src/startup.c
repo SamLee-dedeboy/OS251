@@ -256,7 +256,7 @@ int setSpritePalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB) {
 }
 
 uint32_t calcSmallSpriteControl(uint32_t xy, uint32_t wh, uint32_t p){
-    uint32_t z = 4;
+    uint32_t z = 0x00000004;
 	int32_t x = xy>>16 & (0x0000FFFF);
 	int32_t y = xy & (0x0000FFFF);
 	uint32_t w = wh>>16 & (0x0000FFFF);
