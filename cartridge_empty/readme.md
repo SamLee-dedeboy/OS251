@@ -89,6 +89,8 @@ Graphics utility functions are listed in `graphic.h`
 - `getTimer`: returns a value that is increased upon every iterrupt. Value rounds back to 0 when it reaches 999.
 - `getMode`: get current video mode
 - `getStatus`: get controller status
+- 🔥`enableCMD`: enable CMD button
+- 🔥`disableCMD`: disable CMD button
 - `*getMachinePeriod`: reads `Machine Clock Period Register`.
 - `*getMachineTime`: reads `Machine Time (mtime)`.
 - `*getIntPendingReg`: reads `Interrupt Pending Flag`.

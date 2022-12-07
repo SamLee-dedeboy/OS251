@@ -8,6 +8,12 @@ uint32_t getStatus()
 {
     return systemcall(CONTROLLER_STATUS, 0, 0, 0, 0, 0);
 }
+uint32_t enableCMD() {
+    return systemcall(ENABLE_CMD, 0, 0, 0, 0, 0);
+}
+uint32_t disableCMD() {
+    return systemcall(DISABLE_CMD, 0, 0, 0, 0, 0);
+}
 uint32_t getMode()
 {
     return systemcall(MODE_STATUS, 0, 0, 0, 0, 0);

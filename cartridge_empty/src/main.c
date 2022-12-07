@@ -9,7 +9,6 @@ int main()
 {
     int last_global = global;
     int mode;
-
     // draw text
     char* greeting = "Hello!";
     drawText(greeting, 6, 0, 0);
