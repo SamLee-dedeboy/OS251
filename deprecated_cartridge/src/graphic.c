@@ -267,8 +267,8 @@ void redraw_dropped(int block_map[9][7], int block_length, int b_offset_x, int b
 				// }
 
 				// set dropped sprite control to the back
-				uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(64-down_sprite_count));
-				CONTROL[0] = calcLargeSpriteControl(x, y, w, h, color_num);
+				uint32_t *CONTROL = (volatile uint32_t *)(LARGE_SPRITE_CONTROL_ADDRESS + (0x4)*(64-one_count));
+				CONTROL[0] = CalcLargeSpriteControl(x, y, w, h, color_num);
 			}
 			// else {
 			// 	down_sprite_count -= 1;

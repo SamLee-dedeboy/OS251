@@ -1,5 +1,13 @@
+#ifndef __INCLUDE_STDINT__
+#define __INCLUDE_STDINT__
 #include <stdint.h>
+#endif
+
+#ifndef __INCLUDE_STDIO__
+#define __INCLUDE_STDIO__
 #include <stdio.h>
+#endif
+
 #include "chip.h"
 typedef void (*Tfunc)(void);
 volatile int global = 42;

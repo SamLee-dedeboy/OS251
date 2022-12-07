@@ -3,7 +3,6 @@
 #include "api.h"
 #include "tetris.h"
 
-
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile int global = 42;
@@ -40,6 +39,10 @@ int block_current_y_idx = 0; // index relative to game_board
 int init_x_pos;
 volatile int x_pos;
 
+// Nuber of sprites: 0~127: small sprite; 128~191: large sprite
+int small_sprite_count = 0; // max: 128 small sprites
+int large_sprite_count = 0; // max: 64 large sprites
+
 int main()
 {
     // (*INT_ENABLE_REG) = 0x3; // disable cmd interrupt
@@ -67,48 +70,48 @@ int main()
     // -------end draw Welcome Page--------------
 
     // -----------Set grid palette(background num 0)-----------------
-    setBackgroundPalette(0, 0, 0x00000000); // Transparent
-    setBackgroundPalette(0, 1, 0xFFFFFFFF); // White
-    setBackgroundPalette(0, 2, 0xFF000000); // Black
+    setBackgroundColor(0, 0, 0x00000000); // Transparent
+    setBackgroundColor(0, 1, 0xFFFFFFFF); // White
+    setBackgroundColor(0, 2, 0xFF000000); // Black
 
     // -----------end set grid palette-------------
 
 
     // -----------Set gameboard palette(background num 1)-------------
-    setBackgroundPalette(1, S_type, 0x80990000); // Dark Red
-    setBackgroundPalette(1, I_type, 0x80994C00); // Dark Orange
-    setBackgroundPalette(1, J_type, 0x80999900); // Dark Yellow
-    setBackgroundPalette(1, L_type, 0x804C9900); // Dark Green
-    setBackgroundPalette(1, O_type, 0x80009999); // Dark Turquoise
-    setBackgroundPalette(1, T_type, 0x80000099); // Dark Blue
-    setBackgroundPalette(1, Z_type, 0x804C0099); // Dark Purple
-    setBackgroundPalette(1, 8, 0x00000000); // Transparent
+    setBackgroundColor(1, S_type, 0x80990000); // Dark Red
+    setBackgroundColor(1, I_type, 0x80994C00); // Dark Orange
+    setBackgroundColor(1, J_type, 0x80999900); // Dark Yellow
+    setBackgroundColor(1, L_type, 0x804C9900); // Dark Green
+    setBackgroundColor(1, O_type, 0x80009999); // Dark Turquoise
+    setBackgroundColor(1, T_type, 0x80000099); // Dark Blue
+    setBackgroundColor(1, Z_type, 0x804C0099); // Dark Purple
+    setBackgroundColor(1, 8, 0x00000000); // Transparent
 
-    backgroundDrawRec(1, merge_arg(0, 0), merge_arg(FULL_X, FULL_Y), 8); // fill with tranparent first
-    setBackgroundControl(1, merge_arg(0, 0), 0, 1);
+    backgroundDrawRec(1, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 8); // fill with tranparent first
+    setBackgroundSpriteControl(1, calcBackgroundControl(0,0,0,1));
     // -----------end set gameboard-------------
 
 
     // ---------set block palettes---------------
     // color palatte_num = 0 for blocks
-    setSpritePalette(0, S_type, 0xFFFF3333); // Red
-    setSpritePalette(0, I_type, 0xFFFF9933); // Orange
-    setSpritePalette(0, J_type, 0xFFFFFF33); // Yellow
-    setSpritePalette(0, L_type, 0xFF99FF33); // Green
-    setSpritePalette(0, O_type, 0xFF33FFFF); // Turquoise
-    setSpritePalette(0, T_type, 0xFF3333FF); // Blue
-    setSpritePalette(0, Z_type, 0xFF9933FF); // Purple
-    setSpritePalette(0, 8, 0x00000000); // Transparent
+    setColor(0, S_type, 0xFFFF3333); // Red
+    setColor(0, I_type, 0xFFFF9933); // Orange
+    setColor(0, J_type, 0xFFFFFF33); // Yellow
+    setColor(0, L_type, 0xFF99FF33); // Green
+    setColor(0, O_type, 0xFF33FFFF); // Turquoise
+    setColor(0, T_type, 0xFF3333FF); // Blue
+    setColor(0, Z_type, 0xFF9933FF); // Purple
+    setColor(0, 8, 0x00000000); // Transparent
 
     // transparent palette_num = 1 for blocks
-    setSpritePalette(1, S_type, 0x00000000);
-    setSpritePalette(1, I_type, 0x00000000);
-    setSpritePalette(1, J_type, 0x00000000);
-    setSpritePalette(1, L_type, 0x00000000);
-    setSpritePalette(1, O_type, 0x00000000);
-    setSpritePalette(1, T_type, 0x00000000);
-    setSpritePalette(1, Z_type, 0x00000000);
-    setSpritePalette(1, 8, 0x00000000);
+    setColor(1, S_type, 0x00000000);
+    setColor(1, I_type, 0x00000000);
+    setColor(1, J_type, 0x00000000);
+    setColor(1, L_type, 0x00000000);
+    setColor(1, O_type, 0x00000000);
+    setColor(1, T_type, 0x00000000);
+    setColor(1, Z_type, 0x00000000);
+    setColor(1, 8, 0x00000000);
 
     int rotation = 0;
     int current_block_type = 0;
@@ -116,11 +119,12 @@ int main()
     // -----------end init block palettes-------------
 
     game_state = WELCOME_PAGE_STATE;
-    setVideoMode(TEXT_MODE);
+    setTextMode();
 
     while (1)
     {
-        global =  getTimer();
+        // global =  getTimer();
+        global =  getTicks();
         if(global != last_global) {
 
             mode = getMode();
@@ -139,15 +143,16 @@ int main()
                 else if(game_state == CREATE_BLOCK_STATE) {
                     // random generate next block
                     current_block_type = next_block_type;
-                    next_block_type = global % 7;
+                    // next_block_type = global % 7;
+                    next_block_type = genRandom(7);
                     if(next_block_type == current_block_type) next_block_type++;
                     if(next_block_type == 7) next_block_type = 0;
 
                     // visualize current block
-                    setBlockControl(current_block_type, FULL_X/2-2*UNIT, 0, 0);
+                    setLargeSpriteControl(current_block_type, calcLargeSpriteControl(FULL_X/2-2*UNIT, 0, BLOCK_SIZE, BLOCK_SIZE, 0));
 
                     // visualize next blockgame_board
-                    setBlockControl(next_block_type, (MARGIN/2)*UNIT, FULL_Y/3, 0);
+                    setLargeSpriteControl(next_block_type, calcLargeSpriteControl((MARGIN/2)*UNIT, FULL_Y/3, BLOCK_SIZE, BLOCK_SIZE, 0));
 
                     // reset moving block info
                     block_current_x_idx = game_board_width/2 - 2; // the middle of the game_board
@@ -173,7 +178,7 @@ int main()
                             break;
                         }
                         game_board[y_idx][x_idx] = true;
-                        backgroundDrawRec(1, merge_arg((x_idx+MARGIN)*UNIT, y_idx*UNIT), merge_arg(UNIT, UNIT), current_block_type);
+                        backgroundDrawRec(1, merge_xy((x_idx+MARGIN)*UNIT, y_idx*UNIT), merge_xy(UNIT, UNIT), current_block_type);
                     }
 
                     // check full line
@@ -192,7 +197,7 @@ int main()
                     
                     // set current block to zero-rotation and transparent
                     rotateBlock(current_block_type, 0);
-                    setBlockControl(current_block_type, FULL_X/2-2*UNIT, 0, 1);
+                    setLargeSpriteControl(current_block_type, calcLargeSpriteControl(FULL_X/2-2*UNIT, 0, BLOCK_SIZE, BLOCK_SIZE, 1));
 
 
                     if(y_idx == 0 || y_idx == 1) {
@@ -223,8 +228,8 @@ int main()
                     }
 
                     //clear gameboard background
-                    setVideoMode(TEXT_MODE);
-                    backgroundDrawRec(1, merge_arg(0, 0), merge_arg(FULL_X, FULL_Y), 8); // fill with tranparent
+                    setTextMode();
+                    backgroundDrawRec(1, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 8); // fill with tranparent
                     game_state = WELCOME_PAGE_STATE;
                 }
             }
@@ -318,26 +323,26 @@ void init_game_state(int *rotation) {
         // --------end set units------------
 
         // -----------Draw grid-------------
-        backgroundDrawRec(0, merge_arg(0, 0), merge_arg(FULL_X, FULL_Y), 0); // fill with transparent first
+        backgroundDrawRec(0, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 0); // fill with transparent first
 
         for(int i = 0; i < FULL_X; i += UNIT) {
-            backgroundDrawRec(0, merge_arg(i, 0), merge_arg(1, FULL_Y), 2); // vertical lines
+            backgroundDrawRec(0, merge_xy(i, 0), merge_xy(1, FULL_Y), 2); // vertical lines
         }
         for(int j = 0; j < FULL_Y; j += UNIT) {
-            backgroundDrawRec(0, merge_arg(0, j), merge_arg(FULL_X, 1), 2); // horizontal lines
+            backgroundDrawRec(0, merge_xy(0, j), merge_xy(FULL_X, 1), 2); // horizontal lines
         }
 
         for(int i = (MARGIN+1)*UNIT; i < FULL_X - (MARGIN*UNIT); i+=UNIT) {
             for(int j = 0; j < FULL_Y; j+=UNIT) {
-                backgroundDrawRec(0, merge_arg(i, j), merge_arg(1, 1), 1); // grid points
+                backgroundDrawRec(0, merge_xy(i, j), merge_xy(1, 1), 1); // grid points
             }
         }
 
-        backgroundDrawRec(0, merge_arg(MARGIN*UNIT, 0), merge_arg(game_board_width*UNIT, UNIT+1), 1); // top boarder
-        backgroundDrawRec(0, merge_arg(MARGIN*UNIT - UNIT, 0), merge_arg(UNIT, FULL_Y), 1); // left boarder
-        backgroundDrawRec(0, merge_arg(FULL_X - (MARGIN*UNIT), 0), merge_arg(UNIT, FULL_Y), 1); // right boarder
+        backgroundDrawRec(0, merge_xy(MARGIN*UNIT, 0), merge_xy(game_board_width*UNIT, UNIT+1), 1); // top boarder
+        backgroundDrawRec(0, merge_xy(MARGIN*UNIT - UNIT, 0), merge_xy(UNIT, FULL_Y), 1); // left boarder
+        backgroundDrawRec(0, merge_xy(FULL_X - (MARGIN*UNIT), 0), merge_xy(UNIT, FULL_Y), 1); // right boarder
 
-        setBackgroundControl(0, merge_arg(0, 0), 5, 0); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
+       setBackgroundSpriteControl(0, calcBackgroundControl(0,0,5,0)); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
         // -----------end draw grid---------------
 
 
@@ -355,7 +360,7 @@ void init_game_state(int *rotation) {
     }
 
     game_state = CREATE_BLOCK_STATE;
-    setVideoMode(GRAPHICS_MODE);
+    setGraphicsMode();
     return;
 }
 
@@ -408,9 +413,9 @@ void drop_block_state(int32_t block_type, int *rotation) {
     return;
 }
 
-
 void delete_full_line_state() {
-	uint8_t *DATA = (volatile uint8_t *)(getBACKGROUND_DATA_ADDRESS(1)); // background_num = 1
+    //group_2 no changing background data APIs.
+    uint8_t *DATA = (volatile uint8_t *)(BACKGROUND_DATA_ADDRESS + (0x24000)*1); // background_num = 1
     
     // game board
     int k = 0;
@@ -452,10 +457,11 @@ void delete_full_line_state() {
     return;
 }
 
-
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
-    uint32_t sprite_num = block_type + 128;
-    uint8_t *DATA = (volatile uint8_t *)(getSPRITE_DATA_ADDRESS(sprite_num));
+
+    // group_2 no changing large sprite data APIs.
+    // set sprite data
+    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -479,16 +485,17 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
     }
 
     // set sprite control
-    uint32_t *CONTROL = (volatile uint32_t *)(getSPRITE_CONTROL_ADDRESS(sprite_num));
-    CONTROL[0] = calcLargeSpriteControl(merge_arg(x, 0), merge_arg(BLOCK_SIZE, BLOCK_SIZE), 1); // use transparent palette at initialization
+    setLargeSpriteControl(block_type, calcLargeSpriteControl(x, 0, BLOCK_SIZE, BLOCK_SIZE, 1));
 
 	return block_type + 128;
 }
 
-
 void rotateBlock(uint8_t block_type, uint8_t rotation) {
-    uint32_t sprite_num = block_type + 128;
-    uint8_t *DATA = (volatile uint8_t *)(getSPRITE_DATA_ADDRESS(sprite_num));
+	// uint8_t block_type = sprite_num - 128;
+
+    // group_2 no changing large sprite data API. 
+	// set sprite data
+    uint8_t *DATA = (volatile uint8_t *)(LARGE_SPRITE_DATA_ADDRESS + (0x1000)*(block_type));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -513,17 +520,13 @@ void rotateBlock(uint8_t block_type, uint8_t rotation) {
     }
 }
 
-
-void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num) {
-	// set large sprite control
-    uint32_t sprite_num = block_type + 128;
-    uint32_t *CONTROL = (volatile uint32_t *)(getSPRITE_CONTROL_ADDRESS(sprite_num));
-    CONTROL[0] = calcLargeSpriteControl(merge_arg(x, y), merge_arg(BLOCK_SIZE, BLOCK_SIZE), palette_num); // use transparent palette at initialization
-
-	return;
+// group_2 no getting mode API. function preserved.
+uint32_t getMode() {
+    if (MODE_CONTROL & 1)   return 1;
+    else    return 0;
 }
 
-
+// Pure tetris function. function preserved.
 bool checkCollide_X(int32_t d_x) {
 	int x_idx, y_idx;
     if(d_x < 0) {
@@ -556,7 +559,7 @@ bool checkCollide_X(int32_t d_x) {
 	return false;
 }
 
-
+// Pure tetris function. function preserved.
 bool checkCollide_Y() {
     int x_idx, y_idx;
     for(int k = 3; k >= 0; k--) {
@@ -572,4 +575,80 @@ bool checkCollide_Y() {
     }
 
 	return false;
+}
+
+// group_2 no text drawing on different positions APIs. function preserved.
+int drawText(char* text, uint32_t length, uint32_t x, uint32_t y) {
+	// ranges: x = 0~63; y = 0~35
+	if(x >= 64 || y >= 36) return -1; // position out of range
+
+	char *TEXT_DATA = (volatile char *)(TEXT_DATA_ADDRESS);
+	for(int i = 0; i < length; i++) {
+		int index = y*(0x40) + x + i;
+
+		if(index >= 64*36) continue;
+
+		TEXT_DATA[index] = text[i];
+	}
+
+	return 1;
+}
+
+
+// group_2 no refresh rate setting API. function preserved.
+void setRefreshRate(uint32_t rate) {
+	uint32_t *VIDEO_MODE = (volatile uint32_t *)(MODE_CONTROL_REGISTER);
+	VIDEO_MODE[0] &= ~(0xFE);
+	VIDEO_MODE[0] |= (rate<<1);
+}
+
+uint32_t merge_xy (uint32_t x, uint32_t y) {
+    return (x<<16) | (y);
+}
+
+//group_2 no changing background data APIs.
+int backgroundDrawRec(uint32_t background_num, 
+						uint32_t xy, uint32_t wh,
+						uint32_t colorEntry) {
+	if(background_num < 0 || background_num > 3) return -1;
+
+	int32_t x = xy>>16 & (0x0000FFFF);
+	int32_t y = xy & (0x0000FFFF);
+	uint32_t w = wh>>16 & (0x0000FFFF);
+	uint32_t h = wh & (0x0000FFFF);
+
+	// set background data
+	uint8_t *DATA = (volatile uint8_t *)(BACKGROUND_DATA_ADDRESS + (0x24000)*background_num);
+	for(int i = 0; i < h; i++){
+		for(int j = 0; j < w; j++){
+			DATA[(0x200)*(y+i) + (x+j)] = colorEntry;
+		}
+	}
+
+	return 1;
+}
+
+// contructed by group_2 APIs, fundtion preserved.
+int moveSprite(uint32_t sprite_num, uint32_t d_x, uint32_t d_y) {
+	if(sprite_num < 0 || sprite_num > 191) return -1;
+
+	uint32_t x, y;
+
+	if (sprite_num < 128 ) { // small sprite
+        x = (getSmallSpriteControl(sprite_num) & 0x7FE) >> 2;
+		y = (getSmallSpriteControl(sprite_num) & 0x1FF000) >> 12;
+		x += d_x;
+		y += d_y;
+
+        setSmallSpriteControl(sprite_num, ((getSmallSpriteControl(sprite_num) & ~(0X1FFFFC)) | (x<<2)) | (y<<12));
+	}
+	else { // large sprite
+        x = (getLargeSpriteControl(sprite_num - 128) & 0x7FE) >> 2;
+		y = (getLargeSpriteControl(sprite_num - 128) & 0x1FF000) >> 12;
+		x += d_x;
+		y += d_y;
+
+        setLargeSpriteControl(sprite_num - 128, ((getLargeSpriteControl(sprite_num - 128) & ~(0X1FFFFC)) | (x<<2)) | (y<<12));
+	}
+	return 1;
 }

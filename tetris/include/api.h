@@ -5,8 +5,9 @@
 
 #ifndef API_H_
 #define API_H_
-#include "graphic.h"
 #include "systemcall.h"
+#include "graphic.h"
+#include "thread.h"
 
 // define sys call func parameters
 #define MTIME_LOW (*((volatile uint32_t *)0x40000008))
@@ -15,50 +16,58 @@
 #define MTIMECMP_HIGH (*((volatile uint32_t *)0x40000014))
 #define CONTROLLER (*((volatile uint32_t *)0x40000018))
 
-uint32_t printtext(uint32_t funName, char *text, int variable);
-typedef uint32_t (*TContextEntry)(void *param);
-uint32_t thread_init(uint32_t funName, TContextEntry entry, void *param);
-uint32_t systemcall(uint32_t funName, uint32_t param2, uint32_t param3, uint32_t param4, uint32_t param5, char* param6);
+// --------------System call function identifiers--------------
+#define SYSTIMER 0x00000001
+#define CONTROLLER_STATUS 0x00000002
+#define MODE_STATUS 0x00000003
+#define SMALL_SPRITE_DROP 0x00000004
+#define READ_MACHINE_TIME 0x00000005
+#define READ_MACHINE_PERIOD 0x00000006
+#define READ_INT_PENDING 0x00000007
+#define RAND 0x00000008
+#define SYSIDEO 0x00000009
 
-uint32_t getTimer();
-uint32_t getStatus();
-uint32_t getMode();
-uint32_t spriteDrop();
-uint32_t Thread(void *param);
-
-// get memory addresses.
-uint32_t getBACKGROUND_DATA_ADDRESS(uint32_t background_num); 
-uint32_t getLARGE_SPRITE_DATA_ADDRESS(uint32_t large_sprite_count); 
-uint32_t getSMALL_SPRITE_DATA_ADDRESS(uint32_t small_sprite_count); 
-uint32_t getBACKGROUND_PALLETE_ADDRESS(uint32_t palette_num_test, uint32_t entry_num); 
-uint32_t getSPRITE_PALLETE_ADDRESS(uint32_t palette_num_test, uint32_t entry_num); 
-uint32_t getTEXT_DATA_ADDRESS(); 
-uint32_t getBACKGROUND_CONTROL_ADDRESS(uint32_t background_num); 
-uint32_t getLARGE_SPRITE_CONTROL_ADDRESS(uint32_t large_sprite_count);
-uint32_t getSMALL_SPRITE_CONTROL_ADDRESS(uint32_t small_sprite_count);
-uint32_t getMODE_CONTROL_REGISTER(); 
+// --------------Graphic function identifiers--------------
+// Get video addresses.
+#define get_BACKGROUND_DATA_ADDRESS 0x00000013      
+#define get_LARGE_SPRITE_DATA_ADDRESS 0x0000000A    
+#define get_SMALL_SPRITE_DATA_ADDRESS 0x0000000B    
+#define get_BACKGROUND_PALLETE_ADDRESS 0x0000000C   
+#define get_SPRITE_PALLETE_ADDRESS 0x0000000D    
+#define get_TEXT_DATA_ADDRESS 0x0000000E            
+#define get_BACKGROUND_CONTROL_ADDRESS 0x0000000F   
+#define get_LARGE_SPRITE_CONTROL_ADDRESS 0x00000010 
+#define get_SMALL_SPRITE_CONTROL_ADDRESS 0x00000011 
+#define get_MODE_CONTROL_REGISTER 0x00000012
 
 // Video Controls
-int setVideoMode(uint32_t mode);
-void setRefreshRate(uint32_t rate);
+#define VideoMode 0x00000020
+#define RefreshRate 0x00000021
 
 // Backgrounds
-uint32_t merge_xy(uint32_t x, uint32_t y);
-int setBackgroundPalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB);
-int backgroundDrawRec(uint32_t background_num, uint32_t xy, uint32_t wh, uint32_t colorEntry);
-int setBackgroundControl(uint32_t background_num, uint32_t xy, uint32_t z, uint32_t palette_num);
-int changeBackgroundPalette(uint32_t background_num, uint32_t palette_num);
+#define Merge 0x00000022
+#define setBackgroundPalette_id 0x00000023
+#define backgroundDrawRec_id 0x00000024
+#define setBackgroundControl_id 0x00000025
+#define changeBackgroundPalette_id 0x00000026
 
 // Sprites
-int setSpritePalette(uint32_t palette_num, uint32_t entry_num, uint32_t ARGB);
-uint16_t createRecSprite(uint32_t xy, uint32_t wh, uint32_t palette_num, uint32_t colorEntry);
-int moveSprite(uint32_t sprite_num, uint32_t d_x, uint32_t d_y);
-int changeSpritePalette(uint32_t sprite_num, uint32_t palette_num);
-uint32_t calcSmallSpriteControl(uint32_t xy, uint32_t wh, uint32_t p);
-uint32_t calcLargeSpriteControl(uint32_t xy, uint32_t wh, uint32_t p);
+#define setSpritePalette_id 0x00000027
+#define createRecSprite_id 0x00000028
+#define moveSprite_id 0x00000029
+#define changeSpritePalette_id 0x0000002A
+#define calcSmallSpriteControl_id 0x0000002B
+#define calcLargeSpriteControl_id 0x0000002C
 
-//Text 
-int drawText(char* text, uint32_t length, uint32_t x, uint32_t y);
-void clearTextScreen();
+// Text
+#define drawText_id 0x0000002D
+#define clearTextScreen_id 0x0000002E
+
+// --------------Thread function identifiers--------------
+#define THREAD_INITIALLIZE 0x00000017
+#define WRITE_TEXT 0x00000014
+
+uint32_t systemcall(uint32_t funName, uint32_t param2, uint32_t param3, uint32_t param4, uint32_t param5, char* param6);
+
 
 #endif

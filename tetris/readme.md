@@ -1,6 +1,6 @@
 Sample usage of our API is demonstrated inside `main.c`
 ## Graphics APIs
-Graphics utility functions are implemented and listed in `graphic.h`
+Graphics utility functions are listed in `graphic.h`
 
 ### Video controls
  - `int setVideoMode(int mode)`
