@@ -23,6 +23,101 @@ uint8_t Block[7][4][4] = {
     {{0, 1, 5, 6}, {2, 5, 6, 9}, {4, 5, 9, 10}, {1, 4, 5, 8}}      // Z_type
 };
 
+int score = 0;
+int total_full_line = 0;
+
+uint8_t Digit[10][64] = {
+    { 1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 0
+
+    { 0, 0, 1, 1, 0, 0, 0, 0, 
+      0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0, 0, 0, 
+      0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0, 0, 0, 
+      0, 0, 1, 1, 0, 0, 0, 0 },      // 1
+    
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 0, 0, 0, 0, 
+      1, 1, 0, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 2
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 3
+
+    { 1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0 },      // 4
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 0, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 5
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 0, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 6
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0 },      // 7
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0 },      // 8
+
+    { 1, 1, 1, 1, 1, 1, 0, 0, 
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 0, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0,
+      1, 1, 1, 1, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 
+      0, 0, 0, 0, 1, 1, 0, 0 }      // 9
+};
+
 int UNIT;       // 16 pixels or 8 pixels
 int BLOCK_SIZE; // a block consists of 4UNIT * 4UNIT
 int MARGIN;     // how many amount of UNIT
@@ -139,19 +234,25 @@ int main()
     int next_block_type = 1;
     // -----------end init block palettes-------------
 
+    // ---------set digit palettes---------------
+    // color palatte_num = 2 for digits
+    setSpritePalette(2, 0, 0xFFFFFFFF); // White
+    setSpritePalette(2, 8, 0x00000000); // Transparent
+
+    // transparent palette_num = 3 for digits
+    setSpritePalette(3, 0, 0x00000000);
+    setSpritePalette(3, 8, 0x00000000);
+
+    // -----------end init digit palettes-------------
+
     game_state = WELCOME_PAGE_STATE;
     setVideoMode(TEXT_MODE);
 
     while (1)
     {
-        // global = systemcall(SYSIDEO, 0, 0, 0, 0, 0); // getTimer();
         global = getTimer();
         if (global != last_global)
         {
-            // int video;
-            // video = systemcall(SYSIDEO, 0, 0, 0, 0, 0);
-            // printtext(WRITE_TEXT, "video      %d\n", video);
-
             mode = getMode();
 
             if (mode == TEXT_MODE)
@@ -167,10 +268,7 @@ int main()
             }
             else if (mode == GRAPHICS_MODE)
             {
-                if (game_state == INIT_GAME_STATE)
-                {
-                }
-                else if (game_state == CREATE_BLOCK_STATE)
+                if (game_state == CREATE_BLOCK_STATE)
                 {
                     // random generate next block
                     current_block_type = next_block_type;
@@ -184,7 +282,11 @@ int main()
                     setBlockControl(current_block_type, FULL_X / 2 - 2 * UNIT, 0, 0);
 
                     // visualize next blockgame_board
-                    setBlockControl(next_block_type, (MARGIN / 2) * UNIT, FULL_Y / 3, 0);
+                    setBlockControl(next_block_type, (MARGIN/2)*UNIT, FULL_Y/3, 0);
+
+                    // visualize 2-digit score
+                    setDigitControl((score%100)/10+10, FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, 2);
+                    setDigitControl(score%10, FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, 2);
 
                     // reset moving block info
                     block_current_x_idx = game_board_width / 2 - 2; // the middle of the game_board
@@ -250,17 +352,27 @@ int main()
                 }
                 else if (game_state == DELETE_FULL_LINE_STATE)
                 {
-                    // bool stop = false;
                     if (full_line_count == 0)
                     {
                         // no deletion needed
                     }
                     else
                     {
+                        total_full_line += full_line_count;
+
+                        // clear 2-digit score
+                        setDigitControl((score%100)/10+10, FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, 3);
+                        setDigitControl(score%10, FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, 3);
+
+                        // draw 2-digit score
+                        setDigitControl((total_full_line%100)/10+10, FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, 2);
+                        setDigitControl(total_full_line%10, FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, 2);
+
+                        score = total_full_line;
+
                         delete_full_line_state();
                     }
 
-                    // game_state = (stop)? GAME_OVER_STATE : CREATE_BLOCK_STATE;
                     game_state = CREATE_BLOCK_STATE;
                 }
                 else if (game_state == GAME_OVER_STATE)
@@ -282,14 +394,8 @@ int main()
             }
             last_global = global;
         }
-        
-        // videoInt = systemcall(SYSIDEO, 0, 0, 0, 0, 0);
-        // if(videoInt != last_videoInt) {
-        //     border_color = (border_color == 0)? 2 : 0;
-        //     setBackgroundPalette(2, 1, Rand_sys()); // random color
-        //     setBackgroundControl(0, merge_arg(0, 0), 5, border_color); // change border color upon video interrupt
-        // }
     }
+
     return 0;
 }
 
@@ -318,6 +424,13 @@ void welcome_page_state()
 
             // switch to game
             game_state = INIT_GAME_STATE;
+
+            // clear 2-digit score
+            setDigitControl((score%100)/10+10, FULL_X-(MARGIN-2)*UNIT, FULL_Y/3, 3);
+            setDigitControl(score%10, FULL_X-(MARGIN-2-4)*UNIT, FULL_Y/3, 3);
+            
+            total_full_line = 0;
+            score = 0;
             return;
         }
 
@@ -419,6 +532,30 @@ void init_game_state(int *rotation)
         initBlock(T_type, *rotation, FULL_X / 2 - 2 * UNIT);
         initBlock(Z_type, *rotation, FULL_X / 2 - 2 * UNIT);
         // -----------end draw blocks-----------
+
+        // -----------draw digits (for 2-digit score)-------------
+        initDigit(0, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(1, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(2, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(3, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(4, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(5, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(6, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(7, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(8, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(9, FULL_X-MARGIN*UNIT, FULL_Y/3);
+
+        initDigit(10, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(11, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(12, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(13, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(14, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(15, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(16, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(17, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(18, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        initDigit(19, FULL_X-MARGIN*UNIT, FULL_Y/3);
+        // -----------end draw digits (for 2-digit score-----------
 
         prev_game_unit = current_game_unit;
     }
@@ -577,6 +714,41 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x)
     return block_type + 128;
 }
 
+int initDigit(int digit_type, int32_t x, int32_t y) {
+    // set large sprite data
+    uint32_t sprite_num = digit_type + 128 + 7;
+    uint8_t *DATA = (volatile uint8_t *)(getSPRITE_DATA_ADDRESS(sprite_num));
+
+    // clear to transparent
+    for(int i = 0; i < 64; i++){
+        for(int j = 0; j < 64; j++){
+            DATA[(i<<6) + j] = 8;
+        }
+    }
+
+    int sub_block;
+    int start_x, start_y;
+    int UNIT_tmp = UNIT/2;
+    for(int k = 0; k < 64; k++) {
+        if (Digit[digit_type%10][k] == 1) {
+            sub_block = k;
+            start_x = (sub_block % 8)*UNIT_tmp;
+            start_y = (sub_block / 8)*UNIT_tmp;
+
+            for(int i = 0; i < UNIT_tmp; i++) {
+                for(int j = 0; j < UNIT_tmp; j++) {
+                    DATA[((start_y+i)<<6) + (start_x+j)] = 0;
+                }
+            }
+        }
+    }
+
+    // set large sprite control
+    uint32_t *CONTROL = (volatile uint32_t *)(getSPRITE_CONTROL_ADDRESS(sprite_num));
+    CONTROL[0] = calcLargeSpriteControl(merge_arg(x, y), merge_arg(BLOCK_SIZE, BLOCK_SIZE), 3); // use transparent palette at initialization
+
+	return digit_type + 128 + 10;
+}
 void rotateBlock(uint8_t block_type, uint8_t rotation)
 {
     uint32_t sprite_num = block_type + 128;
@@ -618,6 +790,15 @@ void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_n
     CONTROL[0] = calcLargeSpriteControl(merge_arg(x, y), merge_arg(BLOCK_SIZE, BLOCK_SIZE), palette_num); // use transparent palette at initialization
 
     return;
+}
+
+void setDigitControl(uint8_t digit_type, int32_t x, int32_t y, uint8_t palette_num) {
+	// set large sprite control
+    uint32_t sprite_num = digit_type + 128 + 7;
+    uint32_t *CONTROL = (volatile uint32_t *)(getSPRITE_CONTROL_ADDRESS(sprite_num));
+    CONTROL[0] = calcLargeSpriteControl(merge_arg(x, y), merge_arg(BLOCK_SIZE, BLOCK_SIZE), palette_num); 
+
+	return;
 }
 
 bool checkCollide_X(int32_t d_x)
