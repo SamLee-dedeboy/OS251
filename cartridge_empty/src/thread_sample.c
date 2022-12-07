@@ -26,7 +26,7 @@ int main()
 
     while (1)
     {
-        global = systemcall(SYSTIMER); // TODO: Can not use getTimer()
+        global = getTimer();
         controller_status = getStatus();
         printtext(WRITE_TEXT, "test_num      %d\n", test_num);
     }

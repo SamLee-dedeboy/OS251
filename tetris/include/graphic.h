@@ -23,14 +23,16 @@ void setRefreshRate(uint32_t rate);
 
 // Get video memory addresses.
 uint32_t getBACKGROUND_DATA_ADDRESS(uint32_t background_num); 
-uint32_t getLARGE_SPRITE_DATA_ADDRESS(uint32_t large_sprite_count); 
-uint32_t getSMALL_SPRITE_DATA_ADDRESS(uint32_t small_sprite_count); 
+// uint32_t getLARGE_SPRITE_DATA_ADDRESS(uint32_t large_sprite_count); 
+// uint32_t getSMALL_SPRITE_DATA_ADDRESS(uint32_t small_sprite_count); 
+uint32_t getSPRITE_DATA_ADDRESS(uint32_t sprite_num); 
 uint32_t getBACKGROUND_PALLETE_ADDRESS(uint32_t palette_num, uint32_t entry_num); 
 uint32_t getSPRITE_PALLETE_ADDRESS(uint32_t palette_num, uint32_t entry_num); 
 uint32_t getTEXT_DATA_ADDRESS(); 
 uint32_t getBACKGROUND_CONTROL_ADDRESS(uint32_t background_num); 
-uint32_t getLARGE_SPRITE_CONTROL_ADDRESS(uint32_t large_sprite_count);
-uint32_t getSMALL_SPRITE_CONTROL_ADDRESS(uint32_t small_sprite_count);
+// uint32_t getLARGE_SPRITE_CONTROL_ADDRESS(uint32_t large_sprite_count);
+// uint32_t getSMALL_SPRITE_CONTROL_ADDRESS(uint32_t small_sprite_count);
+uint32_t getSPRITE_CONTROL_ADDRESS(uint32_t sprite_num);
 uint32_t getMODE_CONTROL_REGISTER(); 
 
 // Backgrounds

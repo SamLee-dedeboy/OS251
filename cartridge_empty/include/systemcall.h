@@ -6,18 +6,14 @@
 #ifndef SYSTEMCALL_H
 #define SYSTEMCALL_H
 
+uint32_t getTimer();
+uint32_t getStatus();
+uint32_t getMode();
+uint32_t spriteDrop();
+uint32_t getMachineTime();
+uint32_t getMachinePeriod();
+uint32_t getIntPendingReg();
+uint32_t Rand_sys(); // '_sys' to avoid nameing conflict with stdlib 'Rand()' function
 
-#define SYSTIMER 0x00000001
-#define CONTROLLER_STATUS 0x00000002
-#define MODE_STATUS 0x00000003
-#define SMALL_SPRITE_DROP 0x00000004
-#define READ_MACHINE_TIME 0x00000005
-#define READ_MACHINE_PERIOD 0x00000006
-#define READ_INT_PENDING 0x00000007
-#define RAND 0x00000008
-#define SYSIDEO 0x00000009
-
-#define THREAD_INITIALLIZE 0x00000017
-#define WRITE_TEXT 0x00000014
 
 #endif
