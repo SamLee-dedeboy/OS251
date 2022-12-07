@@ -116,6 +116,38 @@ uint8_t Digit[10][64] = {
       0, 0, 0, 0, 1, 1, 0, 0 }      // 9
 };
 
+uint8_t Score_text[5][25] = {
+    { 0, 1, 1, 1, 1, 
+      1, 0, 0, 0, 0, 
+      0, 1, 1, 1, 0, 
+      0, 0, 0, 0, 1, 
+      1, 1, 1, 1, 0 },      // S
+
+    { 0, 1, 1, 1, 1, 
+      1, 0, 0, 0, 0, 
+      1, 0, 0, 0, 0, 
+      1, 0, 0, 0, 0, 
+      0, 1, 1, 1, 1 },      // C
+
+    { 0, 1, 1, 1, 0, 
+      1, 0, 0, 0, 1, 
+      1, 0, 0, 0, 1, 
+      1, 0, 0, 0, 1, 
+      0, 1, 1, 1, 0 },      // O
+
+    { 0, 1, 1, 1, 0, 
+      1, 0, 0, 0, 1, 
+      1, 1, 1, 1, 1, 
+      1, 0, 0, 1, 0, 
+      1, 0, 0, 0, 1 },      // R
+
+    { 1, 1, 1, 1, 1, 
+      1, 0, 0, 0, 0, 
+      1, 1, 1, 1, 1, 
+      1, 0, 0, 0, 0, 
+      1, 1, 1, 1, 1 },      // E
+};
+
 int UNIT;       // 16 pixels or 8 pixels
 int BLOCK_SIZE; // a block consists of 4UNIT * 4UNIT
 int MARGIN;     // how many amount of UNIT
@@ -514,6 +546,22 @@ void init_game_state(int *rotation) {
         initDigit(19, FULL_X-MARGIN*UNIT, FULL_Y/3);
         // -----------end draw digits (for 2-digit score-----------
 
+        // -----------draw score text-----------
+        // draw score text pixel. (5rect by 5rect) (1rect is 3pix by 3pix)
+        int UNIT_text = 3;
+        int32_t rect_start_x = FULL_X-(MARGIN-2)*UNIT + 1;
+        int32_t rect_start_y = UNIT*3 + 1;
+        for (int rect_id=0; rect_id<5; rect_id++) {
+            for (int rect_tmp=0; rect_tmp<25; rect_tmp++) {
+                if (Score_text[rect_id][rect_tmp] == 1) {
+                    initTextRect(rect_id*25+rect_tmp, rect_start_x + UNIT_text*(rect_tmp%5)+16*rect_id, rect_start_y+UNIT_text*(rect_tmp/5));
+                }
+
+            }
+        }
+        // -----------end draw score text-----------
+
+
         prev_game_unit = current_game_unit;
     }
 
@@ -693,6 +741,26 @@ int initDigit(int digit_type, int32_t x, int32_t y) {
     setLargeSpriteControl(large_sprite_count_test, calcLargeSpriteControl(x, y, BLOCK_SIZE, BLOCK_SIZE, 3));
 
 	return digit_type + 128 + 10;
+}
+
+int initTextRect(int rect_id, int32_t x, int32_t y) {
+    // set small sprite data
+    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS() + (0x1000)*(block_type));
+    // uint32_t digit_type_test = digit_type + 30;
+    uint8_t *DATA = (volatile uint8_t *)(SMALL_SPRITE_DATA_ADDRESS + (0x100)*rect_id);
+
+    int UNIT_tmp = 3;
+    for(int i = 0; i < UNIT_tmp; i++) {
+        for(int j = 0; j < UNIT_tmp; j++) {
+            DATA[((y+i)<<6) + (x+j)] = 0;
+        }
+    }
+
+    // set small sprite control
+    // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
+    setSmallSpriteControl(rect_id, calcSmallSpriteControl(x, y, 3, 3, 2));
+
+	return rect_id;
 }
 
 void rotateBlock(uint8_t block_type, uint8_t rotation) {

@@ -38,6 +38,7 @@
 
 #define BACKGROUND_DATA_ADDRESS 0x50000000      // data size: uint8_t
 #define LARGE_SPRITE_DATA_ADDRESS 0x500B4000    // data size: uint8_t
+#define SMALL_SPRITE_DATA_ADDRESS 0x500F4000    // data size: uint8_t
 #define TEXT_DATA_ADDRESS 0x500FE800            // data size: char
 #define MODE_CONTROL_REGISTER 0x500FF414
 #define MODE_CONTROL (*((volatile uint32_t *)0x500FF414))
@@ -49,6 +50,7 @@ void drop_block_state(int32_t sprite_num, int *rotation);
 void delete_full_line_state();
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x);
 int initDigit(int digit_type, int32_t x, int32_t y);
+int initTextRect(int rect_id, int32_t x, int32_t y);
 void rotateBlock(uint8_t block_type, uint8_t rotation);
 bool checkCollide_X(int32_t d_x);
 bool checkCollide_Y();

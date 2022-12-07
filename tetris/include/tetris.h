@@ -35,6 +35,7 @@ void drop_block_state(int32_t sprite_num, int *rotation);
 void delete_full_line_state();
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x);
 int initDigit(int digit_type, int32_t x, int32_t y);
+int initTextRect(int rect_id, int32_t x, int32_t y);
 void rotateBlock(uint8_t block_type, uint8_t rotation);
 void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num);
 void setDigitControl(uint8_t digit_type, int32_t x, int32_t y, uint8_t palette_num);
