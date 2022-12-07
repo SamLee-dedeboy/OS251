@@ -7,8 +7,6 @@ volatile int global = 42;
 volatile uint32_t controller_status = 0;
 int test_num = 0;
 
-uint32_t Thread(void *param);
-
 uint32_t Thread(void *param)
 {
     int test_num = 0;
