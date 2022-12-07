@@ -92,7 +92,7 @@ uint32_t c_rand(void)
 void c_interrupt_handler(void)
 {
 	// CMD control
-    if ((((*IPR) & 0x4) >> 2))
+    if (((*IER) >> 2) && (((*IPR) & 0x4) >> 2))
     {
         if (MODE_CONTROL == 0x1)
             MODE_CONTROL = 0x00000000;
@@ -475,6 +475,18 @@ uint32_t c_system_call(uint32_t param1, uint32_t param2, uint32_t param3, uint32
 
     case CONTROLLER_STATUS:
         return CONTROLLER;
+        break;
+
+    case ENABLE_CMD:
+		// (*IER) |= ~(1U << 2);
+        (*IER) |= 1UL << 2;
+        return 1;
+        break;
+    case DISABLE_CMD:
+		(*IER) &= ~(1UL << 2);
+        // number &= ~(1UL << n);
+
+        return 1;
         break;
 
     case MODE_STATUS:

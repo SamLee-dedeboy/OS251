@@ -26,6 +26,8 @@
 #define READ_INT_PENDING 0x00000007
 #define RAND 0x00000008
 #define SYSIDEO 0x00000009
+#define ENABLE_CMD 0x0000000FE
+#define DISABLE_CMD 0x0000000FF
 
 // --------------Graphic function identifiers--------------
 // Get video addresses.

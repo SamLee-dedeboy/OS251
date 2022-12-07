@@ -8,6 +8,8 @@
 
 uint32_t getTimer();
 uint32_t getStatus();
+uint32_t enableCMD();
+uint32_t disableCMD();
 uint32_t getMode();
 uint32_t spriteDrop();
 uint32_t getMachineTime();
