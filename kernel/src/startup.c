@@ -91,6 +91,18 @@ uint32_t c_rand(void)
 
 void c_interrupt_handler(void)
 {
+	// CMD control
+    if ((((*IPR) & 0x4) >> 2))
+    {
+        if (MODE_CONTROL == 0x1)
+            MODE_CONTROL = 0x00000000;
+        else if (MODE_CONTROL == 0x0) {
+            MODE_CONTROL = 0x00000001;
+        }
+		(*INT_PENDING_REG) |= ~(1U << 2);
+		return;
+    }
+    // CMD control end
     uint32_t mcause = csr_mcause_read();
     switch (mcause)
     {
@@ -110,18 +122,17 @@ void c_interrupt_handler(void)
         if (*IPR & VIDEO_BIT)
         {
             video_interrupt();
-            return;
+            break;
         }
         if (*IPR & CART_BIT)
         {
             cart_interrupt();
-            return;
+            break;
         }
     }
     default:
         break;
     }
-    (*INT_PENDING_REG) |= ~(1U << 2);
 }
 
 void illegal_inst_interrupt()
