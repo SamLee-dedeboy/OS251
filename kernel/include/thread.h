@@ -1,7 +1,11 @@
+#ifndef __INCLUDE_STDINT__
+#define __INCLUDE_STDINT__
+#include <stdint.h>
+#endif
+
 #ifndef THREAD_H
 #define THREAD_H
 
-#include <stdint.h>
 
 #define MAX_THREAD_NUM 10
 

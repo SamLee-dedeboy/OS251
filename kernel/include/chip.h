@@ -1,7 +1,10 @@
+#ifndef __INCLUDE_STDINT__
+#define __INCLUDE_STDINT__
+#include <stdint.h>
+#endif
+
 #ifndef CHIP_H
 #define CHIP_H
-
-#include <stdint.h>
 
 typedef void (*Tfunc)(void);
 

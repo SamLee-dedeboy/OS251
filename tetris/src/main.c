@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "api.h"
-#include "systemcall.h"
 #include "tetris.h"
+
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
@@ -84,8 +84,8 @@ int main()
     setBackgroundPalette(1, Z_type, 0x804C0099); // Dark Purple
     setBackgroundPalette(1, 8, 0x00000000); // Transparent
 
-    backgroundDrawRec(1, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 8); // fill with tranparent first
-    setBackgroundControl(1, merge_xy(0, 0), 0, 1);
+    backgroundDrawRec(1, merge_arg(0, 0), merge_arg(FULL_X, FULL_Y), 8); // fill with tranparent first
+    setBackgroundControl(1, merge_arg(0, 0), 0, 1);
     // -----------end set gameboard-------------
 
 
@@ -173,7 +173,7 @@ int main()
                             break;
                         }
                         game_board[y_idx][x_idx] = true;
-                        backgroundDrawRec(1, merge_xy((x_idx+MARGIN)*UNIT, y_idx*UNIT), merge_xy(UNIT, UNIT), current_block_type);
+                        backgroundDrawRec(1, merge_arg((x_idx+MARGIN)*UNIT, y_idx*UNIT), merge_arg(UNIT, UNIT), current_block_type);
                     }
 
                     // check full line
@@ -224,7 +224,7 @@ int main()
 
                     //clear gameboard background
                     setVideoMode(TEXT_MODE);
-                    backgroundDrawRec(1, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 8); // fill with tranparent
+                    backgroundDrawRec(1, merge_arg(0, 0), merge_arg(FULL_X, FULL_Y), 8); // fill with tranparent
                     game_state = WELCOME_PAGE_STATE;
                 }
             }
@@ -318,26 +318,26 @@ void init_game_state(int *rotation) {
         // --------end set units------------
 
         // -----------Draw grid-------------
-        backgroundDrawRec(0, merge_xy(0, 0), merge_xy(FULL_X, FULL_Y), 0); // fill with transparent first
+        backgroundDrawRec(0, merge_arg(0, 0), merge_arg(FULL_X, FULL_Y), 0); // fill with transparent first
 
         for(int i = 0; i < FULL_X; i += UNIT) {
-            backgroundDrawRec(0, merge_xy(i, 0), merge_xy(1, FULL_Y), 2); // vertical lines
+            backgroundDrawRec(0, merge_arg(i, 0), merge_arg(1, FULL_Y), 2); // vertical lines
         }
         for(int j = 0; j < FULL_Y; j += UNIT) {
-            backgroundDrawRec(0, merge_xy(0, j), merge_xy(FULL_X, 1), 2); // horizontal lines
+            backgroundDrawRec(0, merge_arg(0, j), merge_arg(FULL_X, 1), 2); // horizontal lines
         }
 
         for(int i = (MARGIN+1)*UNIT; i < FULL_X - (MARGIN*UNIT); i+=UNIT) {
             for(int j = 0; j < FULL_Y; j+=UNIT) {
-                backgroundDrawRec(0, merge_xy(i, j), merge_xy(1, 1), 1); // grid points
+                backgroundDrawRec(0, merge_arg(i, j), merge_arg(1, 1), 1); // grid points
             }
         }
 
-        backgroundDrawRec(0, merge_xy(MARGIN*UNIT, 0), merge_xy(game_board_width*UNIT, UNIT+1), 1); // top boarder
-        backgroundDrawRec(0, merge_xy(MARGIN*UNIT - UNIT, 0), merge_xy(UNIT, FULL_Y), 1); // left boarder
-        backgroundDrawRec(0, merge_xy(FULL_X - (MARGIN*UNIT), 0), merge_xy(UNIT, FULL_Y), 1); // right boarder
+        backgroundDrawRec(0, merge_arg(MARGIN*UNIT, 0), merge_arg(game_board_width*UNIT, UNIT+1), 1); // top boarder
+        backgroundDrawRec(0, merge_arg(MARGIN*UNIT - UNIT, 0), merge_arg(UNIT, FULL_Y), 1); // left boarder
+        backgroundDrawRec(0, merge_arg(FULL_X - (MARGIN*UNIT), 0), merge_arg(UNIT, FULL_Y), 1); // right boarder
 
-        setBackgroundControl(0, merge_xy(0, 0), 5, 0); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
+        setBackgroundControl(0, merge_arg(0, 0), 5, 0); // put grid in front of blocks, blocks(large sprite) are rendered in z-plane 4
         // -----------end draw grid---------------
 
 
@@ -456,10 +456,8 @@ void delete_full_line_state() {
 
 uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 
-    // set sprite data
-    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS() + (0x1000)*(block_type));
-    uint32_t block_type_test = block_type;
-    uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(block_type_test));
+    uint32_t sprite_num = block_type + 128;
+    uint8_t *DATA = (volatile uint8_t *)(getSPRITE_DATA_ADDRESS(sprite_num));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -484,20 +482,17 @@ uint8_t initBlock(uint8_t block_type, uint8_t rotation, int32_t x) {
 
     // set sprite control
     // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
-    uint32_t large_sprite_count_test = block_type;
-    uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
-    CONTROL[0] = calcLargeSpriteControl(merge_xy(x, 0), merge_xy(BLOCK_SIZE, BLOCK_SIZE), 1); // use transparent palette at initialization
+    // uint32_t sprite_num = block_type + 128;
+    uint32_t *CONTROL = (volatile uint32_t *)(getSPRITE_CONTROL_ADDRESS(sprite_num));
+    CONTROL[0] = calcLargeSpriteControl(merge_arg(x, 0), merge_arg(BLOCK_SIZE, BLOCK_SIZE), 1); // use transparent palette at initialization
 
 	return block_type + 128;
 }
 
 
 void rotateBlock(uint8_t block_type, uint8_t rotation) {
-	// uint8_t block_type = sprite_num - 128;
-	// set sprite data
-    // uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS() + (0x1000)*(block_type));
-    uint32_t block_type_test = block_type;
-    uint8_t *DATA = (volatile uint8_t *)(getLARGE_SPRITE_DATA_ADDRESS(block_type_test));
+    uint32_t sprite_num = block_type + 128;
+    uint8_t *DATA = (volatile uint8_t *)(getSPRITE_DATA_ADDRESS(sprite_num));
 
     // clear to transparent
     for(int i = 0; i < 64; i++){
@@ -526,9 +521,9 @@ void rotateBlock(uint8_t block_type, uint8_t rotation) {
 void setBlockControl(uint8_t block_type, int32_t x, int32_t y, uint8_t palette_num) {
 	// set large sprite control
     // uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS() + (0x4)*block_type);
-    uint32_t large_sprite_count_test = block_type;
-    uint32_t *CONTROL = (volatile uint32_t *)(getLARGE_SPRITE_CONTROL_ADDRESS(large_sprite_count_test));
-    CONTROL[0] = calcLargeSpriteControl(merge_xy(x, y), merge_xy(BLOCK_SIZE, BLOCK_SIZE), palette_num); // use transparent palette at initialization
+    uint32_t sprite_num = block_type + 128;
+    uint32_t *CONTROL = (volatile uint32_t *)(getSPRITE_CONTROL_ADDRESS(sprite_num));
+    CONTROL[0] = calcLargeSpriteControl(merge_arg(x, y), merge_arg(BLOCK_SIZE, BLOCK_SIZE), palette_num); // use transparent palette at initialization
 
 	return;
 }

@@ -7,6 +7,8 @@ volatile int global = 42;
 volatile uint32_t controller_status = 0;
 int test_num = 0;
 
+uint32_t Thread(void *param);
+
 uint32_t Thread(void *param)
 {
     int test_num = 0;
@@ -26,7 +28,7 @@ int main()
 
     while (1)
     {
-        global = systemcall(SYSTIMER); // TODO: Can not use getTimer()
+        global = getTimer();
         controller_status = getStatus();
         printtext(WRITE_TEXT, "test_num      %d\n", test_num);
     }

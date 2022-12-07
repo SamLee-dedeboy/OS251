@@ -1,6 +1,18 @@
+#ifndef __INCLUDE_STDINT__
+#define __INCLUDE_STDINT__
 #include <stdint.h>
+#endif
+
+#ifndef __INCLUDE_STDIO__
+#define __INCLUDE_STDIO__
 #include <stdio.h>
+#endif
+
+#ifndef __INCLUDE_STDLIB__
+#define __INCLUDE_STDLIB__
 #include <stdlib.h>
+#endif
+
 #include "chip.h"
 #include "syscallinterr.h"
 #include "thread.h"

@@ -1,8 +1,12 @@
+#ifndef __INCLUDE_STDINT__
+#define __INCLUDE_STDINT__
+#include <stdint.h>
+#endif
+
 #ifndef SYSTEMCALLANDINTERRUPT_H
 #define SYSTEMCALLANDINTERRUPT_H
 
-#include <stdint.h>
-// system call number
+// --------------System call function identifiers--------------
 #define SYSTIMER 0x00000001
 #define CONTROLLER_STATUS 0x00000002
 #define MODE_STATUS 0x00000003
@@ -13,9 +17,8 @@
 #define RAND 0x00000008
 #define SYSVIDEO 0x00000009
 
-#define THREAD_INITIALLIZE 0x00000017
-#define WRITE_TEXT 0x00000014
 
+// --------------Graphic function identifiers--------------
 #define get_BACKGROUND_DATA_ADDRESS 0x00000013      
 #define get_LARGE_SPRITE_DATA_ADDRESS 0x0000000A    
 #define get_SMALL_SPRITE_DATA_ADDRESS 0x0000000B    
@@ -50,7 +53,12 @@
 #define drawText_id 0x0000002D
 #define clearTextScreen_id 0x0000002E
 
+// --------------Thread function identifiers--------------
+#define THREAD_INITIALLIZE 0x00000017
+#define WRITE_TEXT 0x00000014
 
+
+// Video memory addresses
 #define BACKGROUND_DATA_ADDRESS 0x50000000      // data size: uint8_t
 #define LARGE_SPRITE_DATA_ADDRESS 0x500B4000    // data size: uint8_t
 #define SMALL_SPRITE_DATA_ADDRESS 0x500F4000    // data size: uint8_t
