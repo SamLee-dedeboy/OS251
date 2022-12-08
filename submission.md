@@ -130,8 +130,7 @@ System utility functions are listed in `systemcall.h`
 - `getIntPendingReg()`: reads `Interrupt Pending Flag`. This api was requested by another group. 
 - `Rand_sys()`: generates random numbers. ('_sys' to avoid naming conflict with stdlib 'Rand()' function)
 
-*TODO*: add parameters
-- `thread_init()`: initializes a thread to run specified function. 
+- `thread_init()`: initializes a new thread to run specified function. 
    - Read Thread function identifiers (`THREAD_INITIALLIZE`), thread function and thread function's parameters.
    - Sample usage in `cartridge_empty/thread_sample.c`. To run this file please change `main.o` in the Makefile to `thread_sample.o` and re-build the binary. 
 - `printtext()`: print out text to screen when OS was in text mode.
