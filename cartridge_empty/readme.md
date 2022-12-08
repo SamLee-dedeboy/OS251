@@ -86,20 +86,16 @@ Graphics utility functions are listed in `graphic.h`
 
 
 ## System call APIs
-- `getTimer`: returns a value that is increased upon every interrupt. Value rounds back to 0 when it reaches 999.
-- `getMode`: get current video mode
-- `getStatus`: get controller status
-- `enableCMD`: enable CMD button
-- `disableCMD`: disable CMD button
-- `*getMachinePeriod`: reads `Machine Clock Period Register`.
-- `*getMachineTime`: reads `Machine Time (mtime)`.
-- `*getIntPendingReg`: reads `Interrupt Pending Flag`.
-- `*Rand_sys()`: generates random numbers. ('_sys' to avoid naming conflict with stdlib 'Rand()' function)
+- `getTimer()`: returns a value that is increased upon every interrupt. Value rounds back to 0 when it reaches 999.
+- `getMode()`: get current video mode
+- `getStatus()`: get controller status
+- `enableCMD()`: enable CMD button
+- `disableCMD()`: disable CMD button
+- `getMachinePeriod()`: reads `Machine Clock Period Register`.
+- `getMachineTime()`: reads `Machine Time (mtime)`.
+- `getIntPendingReg()`: reads `Interrupt Pending Flag`.
+- `Rand_sys()`: generates random numbers. ('_sys' to avoid naming conflict with stdlib 'Rand()' function)
 - `thread_init()`: initializes a thread to run specified function.
    - Sample usage in `thread_sample.c`. To run this file please change `main.o` in the Makefile to `thread_sample.o` to build the binary. 
 - `printtext()`: print out text to screen when OS was in text mode.
    - Sample usage: `printtext(WRITE_TEXT, "This is a sample usage %d\n", int_param);`. 
-
-
-Note: the `*` apis are not tested yet. Prepare to face chaos when using them.  <!--- by some dude who needs a drink -->
-
