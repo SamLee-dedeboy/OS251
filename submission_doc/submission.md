@@ -2,6 +2,7 @@
 Different versions of our demo are located at:
 - `cartridge_empty/`: Baseline Cartridge provided for other groups to start with.
 - `tetris/`: Tetris game developed on our own OS.
+- `tetris_no_multithread/`: Tetris game developed on our own OS without using multi-thread apis. We found that using multi-thread can have performance issues and could make our game unstable (sometimes blocks won't drop). Therefore we provide a version without using multi-thread apis which is guaranteed to be stable. 
 - `group_0/`: Tetris game developed on Group0's OS. 
 - `group_2/`: Tetris game developed on Group2's OS. 
 
